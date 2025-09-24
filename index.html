@@ -1,0 +1,478 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hotel Viewer</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Font - Inter -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f3f4f6;
+        }
+        .container {
+            max-width: 28rem;
+        }
+        .user-message {
+            background-color: #3b82f6;
+            color: white;
+            align-self: flex-end;
+            margin-left: auto;
+        }
+        .pilot-message {
+            background-color: #e5e7eb;
+            color: #1f2937;
+            align-self: flex-start;
+            margin-right: auto;
+        }
+    </style>
+</head>
+<body class="flex items-center justify-center min-h-screen p-4 sm:p-6">
+    <div class="w-full bg-white p-6 rounded-3xl shadow-2xl flex flex-col items-center container">
+        <h1 class="text-3xl sm:text-4xl font-bold text-center text-gray-800 mb-6">Hotel Manager</h1>
+        <div id="auth-status" class="text-gray-600 mb-4 text-center"></div>
+        <div id="loading" class="text-gray-500 text-lg">Loading...</div>
+        <div id="error-message" class="text-red-500 text-center mt-4 hidden"></div>
+
+        <!-- Authentication Forms -->
+        <div id="auth-forms" class="w-full space-y-4">
+            <!-- Login Form -->
+            <form id="login-form" class="space-y-4">
+                <h2 class="text-2xl font-semibold text-gray-700">Login</h2>
+                <input type="email" id="login-email" placeholder="Email" class="w-full px-4 py-2 border rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <input type="password" id="login-password" placeholder="Password" class="w-full px-4 py-2 border rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <button type="submit" class="w-full px-4 py-2 bg-blue-600 text-white font-bold rounded-xl hover:bg-blue-700 transition duration-300">Login</button>
+                <p class="text-sm text-gray-500 text-center">Don't have an account? <a href="#" id="show-signup" class="text-blue-600 hover:underline">Sign up</a></p>
+                <p class="text-sm text-gray-500 text-center">Forgot password? <a href="#" id="show-reset" class="text-blue-600 hover:underline">Reset it</a></p>
+            </form>
+
+            <!-- Signup Form -->
+            <form id="signup-form" class="space-y-4 hidden">
+                <h2 class="text-2xl font-semibold text-gray-700">Sign Up</h2>
+                <input type="email" id="signup-email" placeholder="Email" class="w-full px-4 py-2 border rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <input type="password" id="signup-password" placeholder="Password" class="w-full px-4 py-2 border rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <div id="recaptcha-container"></div>
+                <button type="submit" class="w-full px-4 py-2 bg-green-600 text-white font-bold rounded-xl hover:bg-green-700 transition duration-300">Sign Up</button>
+                <p class="text-sm text-gray-500 text-center">Already have an account? <a href="#" id="show-login" class="text-blue-600 hover:underline">Login</a></p>
+            </form>
+            
+            <!-- Password Reset Form -->
+            <form id="password-reset-form" class="space-y-4 hidden">
+                <h2 class="text-2xl font-semibold text-gray-700">Reset Password</h2>
+                <p class="text-sm text-gray-600">Enter your phone number to receive a verification code.</p>
+                <input type="tel" id="reset-phone" placeholder="e.g., +15551234567" class="w-full px-4 py-2 border rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <div id="recaptcha-container-reset"></div>
+                <button type="submit" id="send-code-btn" class="w-full px-4 py-2 bg-orange-600 text-white font-bold rounded-xl hover:bg-orange-700 transition duration-300">Send Verification Code</button>
+                <input type="text" id="reset-code" placeholder="Enter verification code" class="w-full px-4 py-2 border rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 hidden">
+                <button type="button" id="verify-code-btn" class="w-full px-4 py-2 bg-purple-600 text-white font-bold rounded-xl hover:bg-purple-700 transition duration-300 hidden">Verify Code</button>
+                <input type="password" id="new-password" placeholder="New Password" class="w-full px-4 py-2 border rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 hidden">
+                <button type="button" id="update-password-btn" class="w-full px-4 py-2 bg-teal-600 text-white font-bold rounded-xl hover:bg-teal-700 transition duration-300 hidden">Update Password</button>
+                <p class="text-sm text-gray-500 text-center"><a href="#" id="back-to-login" class="text-blue-600 hover:underline">Back to Login</a></p>
+            </form>
+        </div>
+
+        <!-- Main Apps -->
+        <div id="app-content" class="w-full hidden">
+            <button id="logout-btn" class="w-full px-4 py-2 mb-4 bg-red-600 text-white font-bold rounded-xl hover:bg-red-700 transition duration-300">Logout</button>
+            
+            <!-- Customer App -->
+            <div id="customer-app" class="w-full space-y-4 hidden">
+                <h2 class="text-2xl font-semibold text-gray-700">Customer View: Hotel Listings</h2>
+                <p class="text-sm text-gray-500 mb-2">Sorted by your preferences.</p>
+                <div id="hotels-list" class="w-full space-y-4"></div>
+            </div>
+
+            <!-- Staff App -->
+            <div id="staff-app" class="w-full space-y-4 hidden">
+                <h2 class="text-2xl font-semibold text-gray-700">Staff Dashboard</h2>
+                <div class="bg-gray-100 p-4 rounded-xl shadow-md border border-gray-200">
+                    <p class="text-lg font-medium text-gray-800">Welcome, Staff Member!</p>
+                    <p class="text-gray-600 mt-2">This is your dedicated dashboard. You can perform administrative tasks here.</p>
+                </div>
+                <div id="users-list-container" class="mt-8">
+                    <h3 class="text-xl font-semibold text-gray-700">Active Users</h3>
+                    <div id="users-list" class="space-y-2 mt-2"></div>
+                </div>
+                <!-- Chat Window -->
+                <div id="chat-container" class="mt-8 border border-gray-300 rounded-xl overflow-hidden shadow-lg h-[400px] flex flex-col">
+                    <div id="chat-messages" class="flex-1 p-4 overflow-y-auto space-y-4 bg-gray-50 flex flex-col"></div>
+                    <form id="chat-form" class="p-4 border-t border-gray-300 flex">
+                        <input type="text" id="chat-input" placeholder="Chat with the Pilot..." class="flex-1 px-4 py-2 border rounded-l-xl focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <button type="submit" class="px-6 py-2 bg-blue-600 text-white font-bold rounded-r-xl hover:bg-blue-700 transition duration-300">Send</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Firebase CDN -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, signOut, RecaptchaVerifier, signInWithPhoneNumber, updatePassword } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, collection, onSnapshot, getDoc, doc, setDoc, query, where, updateDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+        const firebaseConfig = JSON.parse(typeof __firebase_config !== 'undefined' ? __firebase_config : '{}');
+        const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
+
+        const authFormsEl = document.getElementById('auth-forms');
+        const appContentEl = document.getElementById('app-content');
+        const loginFormEl = document.getElementById('login-form');
+        const signupFormEl = document.getElementById('signup-form');
+        const passwordResetFormEl = document.getElementById('password-reset-form');
+        const showSignupEl = document.getElementById('show-signup');
+        const showLoginEl = document.getElementById('show-login');
+        const showResetEl = document.getElementById('show-reset');
+        const backToLoginEl = document.getElementById('back-to-login');
+        const logoutBtnEl = document.getElementById('logout-btn');
+        const customerAppEl = document.getElementById('customer-app');
+        const staffAppEl = document.getElementById('staff-app');
+        const hotelsListEl = document.getElementById('hotels-list');
+        const loadingEl = document.getElementById('loading');
+        const errorMessageEl = document.getElementById('error-message');
+        const authStatusEl = document.getElementById('auth-status');
+        
+        const loginEmailEl = document.getElementById('login-email');
+        const loginPasswordEl = document.getElementById('login-password');
+        const signupEmailEl = document.getElementById('signup-email');
+        const signupPasswordEl = document.getElementById('signup-password');
+        const resetPhoneEl = document.getElementById('reset-phone');
+        const resetCodeEl = document.getElementById('reset-code');
+        const sendCodeBtnEl = document.getElementById('send-code-btn');
+        const verifyCodeBtnEl = document.getElementById('verify-code-btn');
+        const newPasswordEl = document.getElementById('new-password');
+        const updatePasswordBtnEl = document.getElementById('update-password-btn');
+
+        const chatMessagesEl = document.getElementById('chat-messages');
+        const chatFormEl = document.getElementById('chat-form');
+        const chatInputEl = document.getElementById('chat-input');
+        const usersListEl = document.getElementById('users-list');
+
+        let db, auth;
+        let recaptchaVerifier, confirmationResult;
+        let userProfileListener = null;
+
+        async function initializeFirebaseAndAuthenticate() {
+            try {
+                if (Object.keys(firebaseConfig).length === 0) {
+                    throw new Error("Firebase config not available.");
+                }
+
+                const app = initializeApp(firebaseConfig);
+                auth = getAuth(app);
+                db = getFirestore(app);
+
+                authStatusEl.textContent = 'Initializing authentication...';
+
+                onAuthStateChanged(auth, async (user) => {
+                    if (user) {
+                        authFormsEl.classList.add('hidden');
+                        appContentEl.classList.remove('hidden');
+                        authStatusEl.textContent = `Signed in as: ${user.email}`;
+                        await fetchUserRole(user.uid);
+                    } else {
+                        authFormsEl.classList.remove('hidden');
+                        appContentEl.classList.add('hidden');
+                        customerAppEl.classList.add('hidden');
+                        staffAppEl.classList.add('hidden');
+                        authStatusEl.textContent = 'Not signed in.';
+                    }
+                    loadingEl.classList.add('hidden');
+                });
+            } catch (e) {
+                console.error("Firebase initialization failed:", e);
+                loadingEl.classList.add('hidden');
+                errorMessageEl.textContent = `Error: ${e.message}`;
+                errorMessageEl.classList.remove('hidden');
+            }
+        }
+
+        async function fetchUserRole(uid) {
+            try {
+                const userDocRef = doc(db, `artifacts/${appId}/public/data/users`, uid);
+                const docSnap = await getDoc(userDocRef);
+                const role = docSnap.exists() ? docSnap.data().role : 'customer';
+                
+                if (role === 'staff') {
+                    staffAppEl.classList.remove('hidden');
+                    customerAppEl.classList.add('hidden');
+                    listenToUsers();
+                } else {
+                    staffAppEl.classList.add('hidden');
+                    customerAppEl.classList.remove('hidden');
+                    listenToUserPreferences(uid);
+                }
+            } catch (e) {
+                console.error("Error fetching user role:", e);
+                staffAppEl.classList.add('hidden');
+                customerAppEl.classList.remove('hidden');
+                listenToHotels();
+            }
+        }
+
+        function listenToUsers() {
+            const usersCollectionRef = collection(db, `artifacts/${appId}/public/data/users`);
+            onSnapshot(usersCollectionRef, (snapshot) => {
+                usersListEl.innerHTML = '';
+                snapshot.forEach((doc) => {
+                    const user = doc.data();
+                    const userId = doc.id;
+                    const userCard = `
+                        <div class="bg-gray-100 p-4 rounded-xl shadow-md border border-gray-200">
+                            <p class="text-sm font-bold text-gray-800">User ID: <span class="text-xs font-normal">${userId}</span></p>
+                            <p class="text-sm text-gray-600">Role: ${user.role}</p>
+                            <p class="text-sm text-gray-600">Email: ${user.email || 'N/A'}</p>
+                        </div>
+                    `;
+                    usersListEl.innerHTML += userCard;
+                });
+            });
+        }
+        
+        function listenToHotels(preferredAmenities = []) {
+            const collectionPath = `artifacts/${appId}/public/data/hotels`;
+            const hotelsCollection = collection(db, collectionPath);
+            onSnapshot(hotelsCollection, (snapshot) => {
+                let hotels = [];
+                snapshot.forEach((doc) => {
+                    hotels.push({ id: doc.id, ...doc.data() });
+                });
+
+                // Sort hotels based on preferred amenities
+                if (preferredAmenities.length > 0) {
+                    hotels.sort((a, b) => {
+                        const aScore = a.amenities.filter(amenity => preferredAmenities.includes(amenity)).length;
+                        const bScore = b.amenities.filter(amenity => preferredAmenities.includes(amenity)).length;
+                        return bScore - aScore; // Sort in descending order of matching amenities
+                    });
+                }
+
+                hotelsListEl.innerHTML = '';
+                if (hotels.length === 0) {
+                    hotelsListEl.innerHTML = '<p class="text-center text-gray-500">No hotels found.</p>';
+                } else {
+                    hotels.forEach((hotel) => {
+                        const hotelCard = `
+                            <div class="bg-gray-100 p-4 rounded-xl shadow-md border border-gray-200">
+                                <h2 class="text-xl font-bold text-gray-800">${hotel.name}</h2>
+                                <p class="text-sm text-gray-600">${hotel.location}</p>
+                                <div class="mt-2 text-gray-700">
+                                    <p><strong>Rating:</strong> ${hotel.rating} / 5</p>
+                                    <p><strong>Rooms:</strong> ${hotel.rooms}</p>
+                                    <p><strong>Amenities:</strong> ${hotel.amenities.join(', ')}</p>
+                                </div>
+                            </div>
+                        `;
+                        hotelsListEl.innerHTML += hotelCard;
+                    });
+                }
+            }, (error) => {
+                console.error("Error fetching data:", error);
+                errorMessageEl.textContent = `Error loading hotels: ${error.message}`;
+                errorMessageEl.classList.remove('hidden');
+            });
+        }
+
+        function listenToUserPreferences(uid) {
+            const userProfileRef = doc(db, `artifacts/${appId}/public/data/user_profiles`, uid);
+            if (userProfileListener) userProfileListener(); // Unsubscribe from previous listener
+            userProfileListener = onSnapshot(userProfileRef, (docSnap) => {
+                const preferredAmenities = docSnap.exists() && docSnap.data().preferences ? docSnap.data().preferences.amenities_of_interest : [];
+                listenToHotels(preferredAmenities);
+            }, (error) => {
+                console.error("Error fetching user preferences:", error);
+                listenToHotels();
+            });
+        }
+
+        function handleError(error) {
+            errorMessageEl.textContent = `Error: ${error.message}`;
+            errorMessageEl.classList.remove('hidden');
+            setTimeout(() => errorMessageEl.classList.add('hidden'), 5000);
+        }
+        
+        // Event Listeners
+        showSignupEl.addEventListener('click', (e) => {
+            e.preventDefault();
+            loginFormEl.classList.add('hidden');
+            signupFormEl.classList.remove('hidden');
+            passwordResetFormEl.classList.add('hidden');
+            recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
+                'size': 'invisible'
+            });
+        });
+        
+        showLoginEl.addEventListener('click', (e) => {
+            e.preventDefault();
+            loginFormEl.classList.remove('hidden');
+            signupFormEl.classList.add('hidden');
+            passwordResetFormEl.classList.add('hidden');
+        });
+        
+        showResetEl.addEventListener('click', (e) => {
+            e.preventDefault();
+            loginFormEl.classList.add('hidden');
+            signupFormEl.classList.add('hidden');
+            passwordResetFormEl.classList.remove('hidden');
+            recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container-reset', {
+                'size': 'invisible'
+            });
+        });
+
+        backToLoginEl.addEventListener('click', (e) => {
+            e.preventDefault();
+            loginFormEl.classList.remove('hidden');
+            passwordResetFormEl.classList.add('hidden');
+        });
+        
+        loginFormEl.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const email = loginEmailEl.value;
+            const password = loginPasswordEl.value;
+            try {
+                await signInWithEmailAndPassword(auth, email, password);
+            } catch (error) {
+                handleError(error);
+            }
+        });
+
+        signupFormEl.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const email = signupEmailEl.value;
+            const password = signupPasswordEl.value;
+            try {
+                const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+                const userDocRef = doc(db, `artifacts/${appId}/public/data/users`, userCredential.user.uid);
+                await setDoc(userDocRef, { role: 'customer', email: email });
+                const userProfileRef = doc(db, `artifacts/${appId}/public/data/user_profiles`, userCredential.user.uid);
+                await setDoc(userProfileRef, {
+                    preferences: {
+                        preferred_locations: [],
+                        amenities_of_interest: []
+                    },
+                    interaction_history: []
+                });
+            } catch (error) {
+                handleError(error);
+            }
+        });
+        
+        sendCodeBtnEl.addEventListener('click', async (e) => {
+            e.preventDefault();
+            const phoneNumber = resetPhoneEl.value;
+            try {
+                confirmationResult = await signInWithPhoneNumber(auth, phoneNumber, recaptchaVerifier);
+                sendCodeBtnEl.classList.add('hidden');
+                resetCodeEl.classList.remove('hidden');
+                verifyCodeBtnEl.classList.remove('hidden');
+            } catch (error) {
+                handleError(error);
+            }
+        });
+
+        verifyCodeBtnEl.addEventListener('click', async () => {
+            const code = resetCodeEl.value;
+            try {
+                const result = await confirmationResult.confirm(code);
+                verifyCodeBtnEl.classList.add('hidden');
+                newPasswordEl.classList.remove('hidden');
+                updatePasswordBtnEl.classList.remove('hidden');
+            } catch (error) {
+                handleError(error);
+            }
+        });
+
+        updatePasswordBtnEl.addEventListener('click', async () => {
+            const user = auth.currentUser;
+            const newPassword = newPasswordEl.value;
+            try {
+                await updatePassword(user, newPassword);
+                alert("Password updated successfully! Please log in with your new password.");
+                loginFormEl.classList.remove('hidden');
+                passwordResetFormEl.classList.add('hidden');
+            } catch (error) {
+                handleError(error);
+            }
+        });
+        
+        logoutBtnEl.addEventListener('click', async () => {
+            try {
+                await signOut(auth);
+            } catch (error) {
+                handleError(error);
+            }
+        });
+
+        function addChatMessage(sender, message) {
+            const messageEl = document.createElement('div');
+            messageEl.classList.add('p-3', 'rounded-xl', 'max-w-[75%]', sender === 'user' ? 'user-message' : 'pilot-message');
+            messageEl.textContent = message;
+            chatMessagesEl.appendChild(messageEl);
+            chatMessagesEl.scrollTop = chatMessagesEl.scrollHeight;
+        }
+
+        async function updatePilotKnowledge(message) {
+            const uid = auth.currentUser.uid;
+            try {
+                const userProfileRef = doc(db, `artifacts/${appId}/public/data/user_profiles`, uid);
+                const queryWords = message.toLowerCase().split(' ');
+                const locations = ["new york", "london", "paris", "tokyo", "sydney", "rome", "dubai", "rio"];
+                const amenities = ["wi-fi", "pool", "gym", "restaurant", "bar", "spa", "lounge", "conference room", "room service", "laundry"];
+                
+                let preferences = {
+                    preferred_locations: [],
+                    amenities_of_interest: []
+                };
+
+                queryWords.forEach(word => {
+                    if (locations.some(loc => word.includes(loc.split(',')[0].toLowerCase()))) {
+                        const matchedLocation = locations.find(loc => word.includes(loc.split(',')[0].toLowerCase()));
+                        if (matchedLocation && !preferences.preferred_locations.includes(matchedLocation)) {
+                            preferences.preferred_locations.push(matchedLocation);
+                        }
+                    }
+                    if (amenities.includes(word)) {
+                        if (!preferences.amenities_of_interest.includes(word)) {
+                            preferences.amenities_of_interest.push(word);
+                        }
+                    }
+                });
+
+                if (preferences.preferred_locations.length > 0 || preferences.amenities_of_interest.length > 0) {
+                    await updateDoc(userProfileRef, {
+                        'preferences.preferred_locations': preferences.preferred_locations,
+                        'preferences.amenities_of_interest': preferences.amenities_of_interest,
+                    });
+                }
+            } catch (e) {
+                console.error("Error updating pilot knowledge:", e);
+            }
+        }
+
+        chatFormEl.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const message = chatInputEl.value.trim();
+            if (!message) return;
+            addChatMessage('user', message);
+            chatInputEl.value = '';
+
+            const response = await fetch('http://<CLOUD_FUNCTION_URL>/pilot', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ message: message })
+            });
+
+            const data = await response.json();
+            addChatMessage('pilot', data.response);
+        });
+
+        // Initialize the app on page load
+        initializeFirebaseAndAuthenticate();
+    </script>
+</body>
+</html>

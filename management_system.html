@@ -1,0 +1,819 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hotel Management Ecosystem</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap');
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f3f4f6;
+            background-image: url('https://images.unsplash.com/photo-1546252912-f17a58a75e2d?q=80&w=2670&auto=format&fit=crop');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+        }
+        .container {
+            max-width: 1200px;
+            -webkit-backdrop-filter: blur(10px);
+            backdrop-filter: blur(10px);
+            background-color: rgba(255, 255, 255, 0.7);
+        }
+        .task-card, .token-card, .memo-card, .report-card {
+            background-color: rgba(255, 255, 255, 0.9);
+            transition: transform 0.3s ease;
+        }
+        .task-card:hover, .token-card:hover, .memo-card:hover, .report-card:hover {
+            transform: translateY(-5px);
+        }
+        .hidden {
+            display: none;
+        }
+        .message-box {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 1rem 2rem;
+            border-radius: 9999px;
+            background-color: #4b5563;
+            color: #fff;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.5s ease, visibility 0.5s ease;
+        }
+        .message-box.show {
+            opacity: 1;
+            visibility: visible;
+        }
+        .pilot-chat-message {
+            background-color: #d1e7dd;
+            color: #0c5460;
+            padding: 0.5rem 1rem;
+            border-radius: 1rem;
+            align-self: flex-start;
+            margin-bottom: 0.5rem;
+        }
+        .user-chat-message {
+            background-color: #e2e8f0;
+            color: #1a202c;
+            padding: 0.5rem 1rem;
+            border-radius: 1rem;
+            align-self: flex-end;
+            margin-bottom: 0.5rem;
+        }
+        .client-chat-message {
+            background-color: #cce5ff;
+            color: #004085;
+            padding: 0.5rem 1rem;
+            border-radius: 1rem;
+            align-self: flex-start;
+            margin-bottom: 0.5rem;
+        }
+        .pilot-to-client-chat-message {
+            background-color: #e2f0f4;
+            color: #0e6783;
+            padding: 0.5rem 1rem;
+            border-radius: 1rem;
+            align-self: flex-end;
+            margin-bottom: 0.5rem;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 min-h-screen flex items-center justify-center p-4 sm:p-6">
+    <div class="container mx-auto p-6 shadow-xl rounded-2xl border border-gray-200">
+        <header class="text-center mb-8">
+            <h1 class="text-3xl sm:text-4xl font-bold text-gray-800" id="hotelNameTitle"></h1>
+            <p class="mt-2 text-gray-700" id="hotelClassSubtitle"></p>
+        </header>
+
+        <!-- Configuration Section -->
+        <section class="mb-8 p-6 rounded-xl border border-gray-300 bg-white/50 space-y-4">
+            <h2 class="text-xl font-semibold text-gray-700 mb-4">Select Configuration</h2>
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-4">
+                <div>
+                    <label for="hotelSelector" class="block text-sm font-medium text-gray-700 mb-1">Select Hotel</label>
+                    <select id="hotelSelector" class="w-full p-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors duration-200 bg-white/70"></select>
+                </div>
+                <div>
+                    <label for="roleSelector" class="block text-sm font-medium text-gray-700 mb-1">Select Role</label>
+                    <select id="roleSelector" class="w-full p-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors duration-200 bg-white/70"></select>
+                </div>
+            </div>
+        </section>
+
+        <!-- Main Dashboard -->
+        <main id="mainDashboard" class="space-y-8">
+            <!-- Expert Advice Section -->
+            <section class="p-6 rounded-xl border border-gray-300 bg-white/50">
+                <h2 class="text-2xl font-semibold text-gray-700 mb-4">Expert Advice from Pilot</h2>
+                <div id="expertAdvice" class="p-4 rounded-lg bg-gray-100 border border-gray-300 text-gray-700 italic">
+                    <p>Select your hotel and role to receive personalized advice.</p>
+                </div>
+            </section>
+
+            <!-- Role-specific Dashboard Views -->
+            <section id="gmView" class="hidden">
+                <div class="p-6 rounded-xl border border-gray-300 bg-white/50 space-y-4">
+                    <h2 class="text-2xl font-semibold text-gray-700">General Manager Overview</h2>
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        <div class="token-card p-4 rounded-lg shadow-sm">
+                            <h3 class="font-semibold text-gray-600">Total Tokens Awarded</h3>
+                            <p id="totalTokens" class="text-3xl font-bold text-green-600 mt-2">0</p>
+                        </div>
+                        <div class="token-card p-4 rounded-lg shadow-sm">
+                            <h3 class="font-semibold text-gray-600">Eco-Tokens Awarded</h3>
+                            <p id="ecoTokens" class="text-3xl font-bold text-emerald-600 mt-2">0</p>
+                        </div>
+                        <div class="token-card p-4 rounded-lg shadow-sm">
+                            <h3 class="font-semibold text-gray-600">Pending Tasks</h3>
+                            <p id="pendingTasksCount" class="text-3xl font-bold text-red-600 mt-2">0</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Housekeeping Dashboard View -->
+            <section id="housekeepingView" class="hidden">
+                <div class="p-6 rounded-xl border border-gray-300 bg-white/50 space-y-4">
+                    <h2 class="text-2xl font-semibold text-gray-700">Housekeeping Dashboard</h2>
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center space-x-2">
+                            <h3 class="font-semibold text-gray-600">Your Tokens:</h3>
+                            <p id="housekeepingTokens" class="text-2xl font-bold text-green-600">0</p>
+                        </div>
+                        <button id="logEcoActionBtn" class="bg-emerald-600 text-white font-semibold py-2 px-4 rounded-lg shadow-md hover:bg-emerald-700 transition-colors duration-300">Log Eco Action</button>
+                    </div>
+                    <div class="space-y-4" id="housekeepingTasks"></div>
+                </div>
+            </section>
+
+            <!-- Maintenance Dashboard View -->
+            <section id="maintenanceView" class="hidden">
+                <div class="p-6 rounded-xl border border-gray-300 bg-white/50 space-y-4">
+                    <h2 class="text-2xl font-semibold text-gray-700">Maintenance Dashboard</h2>
+                    <div class="flex items-center space-x-2">
+                        <h3 class="font-semibold text-gray-600">Your Tokens:</h3>
+                        <p id="maintenanceTokens" class="text-2xl font-bold text-green-600">0</p>
+                    </div>
+                    <div class="space-y-4" id="maintenanceTasks"></div>
+                </div>
+            </section>
+
+            <!-- Front Desk Dashboard View -->
+            <section id="front_deskView" class="hidden">
+                <div class="p-6 rounded-xl border border-gray-300 bg-white/50 space-y-4">
+                    <h2 class="text-2xl font-semibold text-gray-700">Front Desk Dashboard</h2>
+                    <div class="flex items-center space-x-2">
+                        <h3 class="font-semibold text-gray-600">Your Tokens:</h3>
+                        <p id="frontDeskTokens" class="text-2xl font-bold text-green-600">0</p>
+                    </div>
+                    <div class="space-y-4" id="frontDeskTasks"></div>
+                </div>
+            </section>
+
+            <!-- Eco-Specialist Dashboard View -->
+            <section id="eco_specialistView" class="hidden">
+                <div class="p-6 rounded-xl border border-gray-300 bg-white/50 space-y-4">
+                    <h2 class="text-2xl font-semibold text-gray-700">Eco-Specialist Dashboard</h2>
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center space-x-2">
+                            <h3 class="font-semibold text-gray-600">Your Tokens:</h3>
+                            <p id="ecoSpecialistTokens" class="text-2xl font-bold text-green-600">0</p>
+                        </div>
+                        <button id="logEcoMarketingBtn" class="bg-blue-600 text-white font-semibold py-2 px-4 rounded-lg shadow-md hover:bg-blue-700 transition-colors duration-300">Log Marketing Effort</button>
+                    </div>
+                    <div class="space-y-4" id="ecoSpecialistTasks"></div>
+                </div>
+            </section>
+
+            <!-- Custom Roles for High-End Hotels -->
+            <section id="customRoleView" class="hidden">
+                <div class="p-6 rounded-xl border border-gray-300 bg-white/50 space-y-4">
+                    <h2 class="text-2xl font-semibold text-gray-700" id="customRoleTitle"></h2>
+                    <div class="flex items-center space-x-2">
+                        <h3 class="font-semibold text-gray-600">Your Tokens:</h3>
+                        <p id="customRoleTokens" class="text-2xl font-bold text-green-600">0</p>
+                    </div>
+                    <div class="space-y-4" id="customRoleTasks"></div>
+                </div>
+            </section>
+
+            <!-- Internal Communications Section -->
+            <section class="p-6 rounded-xl border border-gray-300 bg-white/50">
+                <h2 class="text-xl font-semibold text-gray-700 mb-4">Internal Communications</h2>
+                <div id="chatLog" class="bg-gray-100 p-4 rounded-lg h-48 overflow-y-auto mb-4 border border-gray-300 flex flex-col"></div>
+                <div class="flex space-x-2">
+                    <div>
+                        <label for="recipientSelect" class="sr-only">Select Recipient</label>
+                        <select id="recipientSelect" class="p-2 rounded-lg border border-gray-300 bg-white/70">
+                            <option value="all">All Staff</option>
+                        </select>
+                    </div>
+                    <input type="text" id="chatInput" placeholder="Send a message..." class="flex-1 p-2 rounded-lg border border-gray-300 bg-white/70">
+                    <button id="sendMessageBtn" class="bg-indigo-600 text-white font-semibold py-2 px-4 rounded-lg shadow-md hover:bg-indigo-700 transition-colors duration-300">Send</button>
+                </div>
+            </section>
+
+            <!-- Pilot Assistant Chatbot -->
+            <section class="p-6 rounded-xl border border-gray-300 bg-white/50">
+                <h2 class="text-xl font-semibold text-gray-700 mb-4">Pilot Assistant</h2>
+                <div id="pilotChatLog" class="bg-gray-100 p-4 rounded-lg h-48 overflow-y-auto mb-4 border border-gray-300 flex flex-col">
+                    <div class="pilot-chat-message">Welcome! I am the Eco-Pilot Assistant. Ask me a question about tasks, roles, or protocols.</div>
+                </div>
+                <div class="flex space-x-2">
+                    <input type="text" id="pilotChatInput" placeholder="Ask the Pilot a question..." class="flex-1 p-2 rounded-lg border border-gray-300 bg-white/70">
+                    <button id="sendPilotMessageBtn" class="bg-teal-600 text-white font-semibold py-2 px-4 rounded-lg shadow-md hover:bg-teal-700 transition-colors duration-300">Ask</button>
+                </div>
+            </section>
+
+            <!-- New Client Conversation Section -->
+            <section class="p-6 rounded-xl border border-gray-300 bg-white/50">
+                <h2 class="text-xl font-semibold text-gray-700 mb-4">Client Conversation with Pilot</h2>
+                <div id="clientChatLog" class="bg-gray-100 p-4 rounded-lg h-48 overflow-y-auto mb-4 border border-gray-300 flex flex-col">
+                    <div class="pilot-to-client-chat-message">Welcome! How can I help you today?</div>
+                </div>
+                <div class="flex space-x-2">
+                    <input type="text" id="clientChatInput" placeholder="Enter your request..." class="flex-1 p-2 rounded-lg border border-gray-300 bg-white/70">
+                    <button id="sendClientMessageBtn" class="bg-blue-600 text-white font-semibold py-2 px-4 rounded-lg shadow-md hover:bg-blue-700 transition-colors duration-300">Send Request</button>
+                </div>
+            </section>
+
+            <!-- Memos & Reports Section -->
+            <section class="p-6 rounded-xl border border-gray-300 bg-white/50">
+                <h2 class="text-xl font-semibold text-gray-700 mb-4">Memos & Reports</h2>
+                <div class="flex space-x-4 mb-4">
+                    <button id="generateMemoBtn" class="bg-gray-600 text-white font-semibold py-2 px-4 rounded-lg shadow-md hover:bg-gray-700 transition-colors duration-300">Generate New Memo</button>
+                    <button id="generateReportBtn" class="bg-gray-600 text-white font-semibold py-2 px-4 rounded-lg shadow-md hover:bg-gray-700 transition-colors duration-300">Generate Report</button>
+                </div>
+                <div id="memosAndReports" class="space-y-4"></div>
+            </section>
+
+        </main>
+
+        <div id="statusMessage" class="message-box"></div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, getDoc, addDoc, setDoc, updateDoc, deleteDoc, onSnapshot, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { setLogLevel } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // Enable Firestore debug logging
+        setLogLevel('debug');
+
+        // --- Core Application State & Data ---
+        let db;
+        let auth;
+        let userId;
+        let appId;
+        let currentHotel = {};
+        let currentUser = {};
+
+        // DOM Elements
+        const hotelSelector = document.getElementById('hotelSelector');
+        const roleSelector = document.getElementById('roleSelector');
+        const hotelNameTitle = document.getElementById('hotelNameTitle');
+        const hotelClassSubtitle = document.getElementById('hotelClassSubtitle');
+        const expertAdviceEl = document.getElementById('expertAdvice');
+        const views = {
+            gmView: document.getElementById('gmView'), housekeepingView: document.getElementById('housekeepingView'), maintenanceView: document.getElementById('maintenanceView'), front_deskView: document.getElementById('front_deskView'), eco_specialistView: document.getElementById('eco_specialistView'), customRoleView: document.getElementById('customRoleView')
+        };
+        const housekeepingTasksEl = document.getElementById('housekeepingTasks');
+        const maintenanceTasksEl = document.getElementById('maintenanceTasks');
+        const frontDeskTasksEl = document.getElementById('frontDeskTasks');
+        const ecoSpecialistTasksEl = document.getElementById('ecoSpecialistTasks');
+        const customRoleTasksEl = document.getElementById('customRoleTasks');
+        const chatLogEl = document.getElementById('chatLog');
+        const pilotChatLogEl = document.getElementById('pilotChatLog');
+        const clientChatLogEl = document.getElementById('clientChatLog');
+        const chatInput = document.getElementById('chatInput');
+        const pilotChatInput = document.getElementById('pilotChatInput');
+        const clientChatInput = document.getElementById('clientChatInput');
+        const sendMessageBtn = document.getElementById('sendMessageBtn');
+        const sendPilotMessageBtn = document.getElementById('sendPilotMessageBtn');
+        const sendClientMessageBtn = document.getElementById('sendClientMessageBtn');
+        const recipientSelect = document.getElementById('recipientSelect');
+        const logEcoActionBtn = document.getElementById('logEcoActionBtn');
+        const logEcoMarketingBtn = document.getElementById('logEcoMarketingBtn');
+        const statusMessageEl = document.getElementById('statusMessage');
+        const generateMemoBtn = document.getElementById('generateMemoBtn');
+        const generateReportBtn = document.getElementById('generateReportBtn');
+        const memosAndReportsEl = document.getElementById('memosAndReports');
+
+        function displayMessage(message, color) {
+            statusMessageEl.textContent = message;
+            statusMessageEl.style.backgroundColor = color;
+            statusMessageEl.classList.add('show');
+            setTimeout(() => {
+                statusMessageEl.classList.remove('show');
+            }, 3000);
+        }
+
+        async function updateTokens(profileId, amount) {
+            if (!currentHotel || !currentHotel.id) return;
+            const profileRef = doc(db, `/artifacts/${appId}/public/data/hotels/${currentHotel.id}/staff_profiles/${profileId}`);
+            try {
+                await updateDoc(profileRef, {
+                    tokens: currentHotel.staff_profiles.find(p => p.id === profileId).tokens + amount
+                });
+            } catch (error) {
+                console.error("Error updating tokens:", error);
+            }
+        }
+
+        async function updateTaskStatus(taskId, newStatus) {
+            if (!currentHotel || !currentHotel.id) return;
+            const taskRef = doc(db, `/artifacts/${appId}/public/data/hotels/${currentHotel.id}/tasks/${taskId}`);
+            try {
+                await updateDoc(taskRef, { status: newStatus });
+            } catch (error) {
+                console.error("Error updating task status:", error);
+            }
+        }
+
+        async function addChatCommunication(message, recipient) {
+            if (!currentHotel || !currentHotel.id) return;
+            const chatRef = collection(db, `/artifacts/${appId}/public/data/hotels/${currentHotel.id}/communications`);
+            const newMessage = {
+                sender_id: currentUser.id,
+                sender_name: currentUser.name,
+                message: message,
+                recipient: recipient,
+                timestamp: new Date().toISOString()
+            };
+            try {
+                await addDoc(chatRef, newMessage);
+            } catch (error) {
+                console.error("Error adding chat message:", error);
+            }
+        }
+
+        async function addMemoOrReport(type, title, content) {
+            if (!currentHotel || !currentHotel.id) return;
+            const memosRef = collection(db, `/artifacts/${appId}/public/data/hotels/${currentHotel.id}/memos_reports`);
+            const newDoc = {
+                type: type,
+                title: title,
+                date: new Date().toLocaleDateString(),
+                content: content
+            };
+            try {
+                await addDoc(memosRef, newDoc);
+            } catch (error) {
+                console.error("Error adding memo/report:", error);
+            }
+        }
+
+        async function addGeneratedTask(task) {
+            if (!currentHotel || !currentHotel.id) return;
+            const tasksRef = collection(db, `/artifacts/${appId}/public/data/hotels/${currentHotel.id}/tasks`);
+            try {
+                await addDoc(tasksRef, {
+                    ...task,
+                    assigned_to: "Pilot",
+                    status: "pending",
+                    created_at: new Date().toISOString(),
+                });
+            } catch (error) {
+                console.error("Error adding generated task:", error);
+            }
+        }
+
+        // Fetch data and set up real-time listeners
+        async function fetchHotelDataAndListen() {
+            if (!db) return;
+
+            // Fetch all hotels to populate the selector
+            const hotelsSnapshot = await getDocs(collection(db, `/artifacts/${appId}/public/data/hotels`));
+            const hotelsData = hotelsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+
+            hotelsData.forEach(hotel => {
+                const option = document.createElement('option');
+                option.value = hotel.id;
+                option.textContent = `${hotel.name} (${hotel.hotelClass})`;
+                hotelSelector.appendChild(option);
+            });
+            if (hotelsData.length > 0) {
+                hotelSelector.value = hotelsData[0].id;
+                await setHotel(hotelsData[0].id);
+            }
+
+            // Listen for changes on the selected hotel's subcollections
+            onSnapshot(doc(db, `/artifacts/${appId}/public/data/hotels`, hotelSelector.value), (docSnapshot) => {
+                if (docSnapshot.exists()) {
+                    currentHotel = { id: docSnapshot.id, ...docSnapshot.data() };
+                    renderDashboard();
+                }
+            });
+
+            onSnapshot(collection(db, `/artifacts/${appId}/public/data/hotels/${hotelSelector.value}/staff_profiles`), (snapshot) => {
+                currentHotel.staff_profiles = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                currentUser = currentHotel.staff_profiles.find(p => p.id === userId) || {};
+                populateRoleSelector();
+                renderDashboard();
+            });
+
+            onSnapshot(collection(db, `/artifacts/${appId}/public/data/hotels/${hotelSelector.value}/tasks`), (snapshot) => {
+                currentHotel.tasks = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                renderDashboard();
+            });
+
+            onSnapshot(collection(db, `/artifacts/${appId}/public/data/hotels/${hotelSelector.value}/communications`), (snapshot) => {
+                currentHotel.communications = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                renderChat();
+            });
+
+            onSnapshot(collection(db, `/artifacts/${appId}/public/data/hotels/${hotelSelector.value}/memos_reports`), (snapshot) => {
+                currentHotel.memos_reports = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                renderMemosAndReports();
+            });
+        }
+        
+        async function setHotel(hotelId) {
+            const hotelRef = doc(db, `/artifacts/${appId}/public/data/hotels/${hotelId}`);
+            const hotelSnap = await getDoc(hotelRef);
+            if (hotelSnap.exists()) {
+                currentHotel = { id: hotelSnap.id, ...hotelSnap.data() };
+                const staffSnap = await getDocs(collection(db, `/artifacts/${appId}/public/data/hotels/${hotelId}/staff_profiles`));
+                currentHotel.staff_profiles = staffSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                const tasksSnap = await getDocs(collection(db, `/artifacts/${appId}/public/data/hotels/${hotelId}/tasks`));
+                currentHotel.tasks = tasksSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                const commsSnap = await getDocs(collection(db, `/artifacts/${appId}/public/data/hotels/${hotelId}/communications`));
+                currentHotel.communications = commsSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                const memosSnap = await getDocs(collection(db, `/artifacts/${appId}/public/data/hotels/${hotelId}/memos_reports`));
+                currentHotel.memos_reports = memosSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+
+                populateRoleSelector();
+                renderDashboard();
+            }
+        }
+
+        // UI rendering functions
+        function populateRoleSelector() {
+            roleSelector.innerHTML = '';
+            currentHotel.staff_profiles.forEach(profile => {
+                const option = document.createElement('option');
+                option.value = profile.role;
+                option.textContent = profile.role.split('_').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
+                roleSelector.appendChild(option);
+            });
+        }
+
+        function renderDashboard() {
+            if (!currentHotel || !currentHotel.id) return;
+            hotelNameTitle.textContent = currentHotel.name;
+            hotelClassSubtitle.textContent = `(${currentHotel.hotelClass} Class Hotel)`;
+
+            Object.values(views).forEach(view => view.classList.add('hidden'));
+            const viewId = `${currentRole}View`;
+            if (views[viewId]) {
+                views[viewId].classList.remove('hidden');
+            } else {
+                views['customRoleView'].classList.remove('hidden');
+                document.getElementById('customRoleTitle').textContent = roleSelector.options[roleSelector.selectedIndex]?.textContent || 'Custom Role';
+                document.getElementById('customRoleTokens').textContent = currentUser.tokens;
+                renderDepartmentTasks(currentUser.department, customRoleTasksEl, `Task Completed! +10 Tokens`);
+            }
+
+            renderExpertAdvice();
+            renderMemosAndReports();
+
+            switch (currentRole) {
+                case 'general_manager':
+                    renderGeneralManagerDashboard();
+                    break;
+                case 'housekeeping':
+                    renderDepartmentTasks('housekeeping', housekeepingTasksEl, 'Task Completed! +10 Tokens');
+                    document.getElementById('housekeepingTokens').textContent = currentUser.tokens;
+                    break;
+                case 'maintenance':
+                    renderDepartmentTasks('maintenance', maintenanceTasksEl, 'Repair Complete! +15 Tokens');
+                    document.getElementById('maintenanceTokens').textContent = currentUser.tokens;
+                    break;
+                case 'front_desk':
+                    renderDepartmentTasks('front_desk', frontDeskTasksEl, 'Request Fulfilled! +5 Tokens');
+                    document.getElementById('frontDeskTokens').textContent = currentUser.tokens;
+                    break;
+                case 'eco_specialist':
+                    renderDepartmentTasks('eco', ecoSpecialistTasksEl, 'Audit Complete! +20 Tokens');
+                    document.getElementById('ecoSpecialistTokens').textContent = currentUser.tokens;
+                    break;
+            }
+        }
+
+        function renderGeneralManagerDashboard() {
+            const totalTokens = currentHotel.staff_profiles.reduce((sum, p) => sum + p.tokens, 0);
+            const ecoTokens = currentHotel.tasks.filter(t => t.type === 'eco_action').length * 25;
+            const pendingTasksCount = currentHotel.tasks.filter(t => t.status === 'pending').length;
+
+            document.getElementById('totalTokens').textContent = totalTokens;
+            document.getElementById('ecoTokens').textContent = ecoTokens;
+            document.getElementById('pendingTasksCount').textContent = pendingTasksCount;
+        }
+
+        function renderDepartmentTasks(department, container, completeMessage) {
+            container.innerHTML = '';
+            const departmentTasks = currentHotel.tasks.filter(task => task.department === department && task.status !== 'completed');
+            if (departmentTasks.length === 0) {
+                container.innerHTML = `<p class="text-center text-gray-500 mt-4">No pending tasks for this department.</p>`;
+                return;
+            }
+            departmentTasks.forEach(task => {
+                const taskCard = document.createElement('div');
+                let priorityColor = 'bg-gray-200';
+                if (task.priority === 'high') priorityColor = 'bg-red-200';
+                if (task.priority === 'medium') priorityColor = 'bg-yellow-200';
+                if (task.priority === 'low') priorityColor = 'bg-green-200';
+
+                taskCard.className = `task-card p-4 rounded-xl shadow-sm border border-gray-300 space-y-2`;
+                taskCard.innerHTML = `
+                    <div class="flex items-center justify-between">
+                        <span class="px-2 py-1 text-xs font-semibold rounded-full ${priorityColor} text-gray-800 capitalize">${task.priority} Priority</span>
+                        <span class="text-sm font-semibold text-gray-700 capitalize">Status: ${task.status}</span>
+                    </div>
+                    <p class="text-sm text-gray-600">${task.description}</p>
+                    <p class="text-xs text-gray-500">Assigned to: ${task.assigned_to}</p>
+                    <button class="complete-btn w-full bg-green-600 text-white font-semibold py-2 px-4 rounded-lg shadow-md hover:bg-green-700 transition-colors duration-300 mt-2" data-task-id="${task.id}">Mark as Done</button>
+                `;
+                container.appendChild(taskCard);
+
+                const completeBtn = taskCard.querySelector('.complete-btn');
+                completeBtn.addEventListener('click', async () => {
+                    await updateTaskStatus(task.id, 'completed');
+                    await updateTokens(currentUser.id, 10);
+                    displayMessage(completeMessage, '#10b981');
+                });
+            });
+        }
+
+        function renderChat() {
+            chatLogEl.innerHTML = '';
+            if (!currentHotel || !currentHotel.communications) return;
+            currentHotel.communications.forEach(msg => {
+                const isSentByCurrentUser = msg.sender_id === currentUser.id;
+                const messageEl = document.createElement('div');
+                messageEl.className = `p-2 my-1 rounded-lg max-w-[80%] ${isSentByCurrentUser ? 'bg-indigo-200 self-end' : 'bg-gray-200 self-start'}`;
+                const recipientName = msg.recipient === 'all' ? 'All' : (currentHotel.staff_profiles.find(p => p.role === msg.recipient)?.name || 'Unknown');
+                messageEl.innerHTML = `<span class="font-semibold text-gray-800">${msg.sender_name} (${recipientName}):</span> ${msg.message}`;
+                chatLogEl.appendChild(messageEl);
+            });
+            chatLogEl.scrollTop = chatLogEl.scrollHeight;
+        }
+
+        function renderPilotChat(message, sender) {
+            const messageEl = document.createElement('div');
+            messageEl.className = sender === 'pilot' ? 'pilot-chat-message' : 'user-chat-message';
+            messageEl.textContent = message;
+            pilotChatLogEl.appendChild(messageEl);
+            pilotChatLogEl.scrollTop = pilotChatLogEl.scrollHeight;
+        }
+
+        function renderClientChat(message, sender) {
+            const messageEl = document.createElement('div');
+            messageEl.className = sender === 'client' ? 'client-chat-message' : 'pilot-to-client-chat-message';
+            messageEl.textContent = message;
+            clientChatLogEl.appendChild(messageEl);
+            clientChatLogEl.scrollTop = clientChatLogEl.scrollHeight;
+        }
+
+        function renderMemosAndReports() {
+            memosAndReportsEl.innerHTML = '';
+            if (!currentHotel || !currentHotel.memos_reports || currentHotel.memos_reports.length === 0) {
+                memosAndReportsEl.innerHTML = `<p class="text-center text-gray-500">No memos or reports to display.</p>`;
+            } else {
+                 currentHotel.memos_reports.forEach(item => {
+                    const itemCard = document.createElement('div');
+                    itemCard.className = `${item.type}-card p-4 rounded-lg shadow-sm border border-gray-300`;
+                    itemCard.innerHTML = `<h3 class="font-semibold text-gray-700 text-lg mb-2">${item.title}</h3><p class="text-sm text-gray-600 italic">${item.date}</p><div class="mt-2 text-gray-700"><pre class="whitespace-pre-wrap">${item.content}</pre></div>`;
+                    memosAndReportsEl.appendChild(itemCard);
+                });
+            }
+        }
+
+        function renderExpertAdvice() {
+            let advice = "";
+            if (!currentHotel || !currentHotel.id || !currentHotel.staff_profiles) {
+                expertAdviceEl.innerHTML = `<p>Select your hotel and role to receive personalized advice.</p>`;
+                return;
+            }
+            const pendingTasks = currentHotel.tasks.filter(t => t.status === 'pending');
+
+            switch (currentUser.role) {
+                case 'general_manager':
+                    const pendingByDept = pendingTasks.reduce((acc, task) => { acc[task.department] = (acc[task.department] || 0) + 1; return acc; }, {});
+                    const departmentWithMostPending = Object.keys(pendingByDept).sort((a, b) => pendingByDept[b] - pendingByDept[a])[0];
+                    advice = `**Overall Performance:** The **${departmentWithMostPending}** department currently has the highest number of pending tasks. Focus resources here to improve efficiency. Guest satisfaction trends are positive, and the pilot recommends maintaining current staffing levels.`;
+                    break;
+                case 'housekeeping':
+                    advice = `**Service Quality:** Your team's average task completion time is excellent. Guest reviews show a 95% satisfaction rate for room cleanliness. The pilot recommends you continue to prioritize attention to detail.`;
+                    break;
+                case 'maintenance':
+                    advice = `**Operational Efficiency:** The average time to resolve a high-priority maintenance issue is under 30 minutes, contributing to positive guest reviews. The pilot recommends proactive checks on core amenities to reduce high-priority incidents.`;
+                    break;
+                case 'front_desk':
+                    advice = `**Guest Relations:** Your personalized check-in process has led to a 10% increase in positive online reviews. The pilot's data analysis indicates that proactive service, such as offering recommendations for local activities, significantly improves guest retention.`;
+                    break;
+                case 'eco_specialist':
+                    advice = `**Sustainability Impact:** The hotel's eco-friendly practices, such as waste reduction and energy-saving measures, have reduced operational costs by 5%. The pilot recommends a new initiative to promote reusable water bottles to guests, which could further reduce costs and improve eco-tokens.`;
+                    break;
+                case 'concierge':
+                    advice = `**Guest Experience:** Guest data shows that personalized recommendations for local dining and entertainment are highly valued. The pilot suggests a quarterly review of new attractions to provide the most current and relevant advice, which will increase tips and positive feedback.`;
+                    break;
+                case 'spa_manager':
+                    advice = `**Revenue Optimization:** Your recent promotional offers have increased spa booking rates by 15%. The pilot advises cross-promoting with the fine dining restaurant to offer a 'Relax & Dine' package, which could increase overall revenue.`;
+                    break;
+                case 'fine_dining_chef':
+                    advice = `**Culinary Excellence:** Guest feedback consistently praises the quality of the 'Signature Dish'. The pilot's analysis suggests that highlighting local, seasonal ingredients in the menu has led to higher guest satisfaction and a 20% increase in food and beverage revenue.`;
+                    break;
+                default:
+                    advice = `Select your hotel and role to receive personalized advice.`;
+                    break;
+            }
+            expertAdviceEl.innerHTML = `<p>${advice}</p>`;
+        }
+
+        function generatePilotResponse(userPrompt) {
+            userPrompt = userPrompt.toLowerCase();
+            if (userPrompt.includes('new staff') || userPrompt.includes('instructions')) {
+                return `**Welcome!** Your dashboard shows tasks assigned to you. Mark a task as 'done' to complete it and earn tokens. The chat is for communicating with colleagues.`;
+            }
+            if (userPrompt.includes('tokens') || userPrompt.includes('rewards')) {
+                return `Tokens are awarded for completing tasks on time, logging eco-friendly actions, and marketing efforts.`;
+            }
+            if (userPrompt.includes('communication') || userPrompt.includes('chat')) {
+                return `You can communicate with your team via the 'Internal Communications' chat. Select a recipient from the dropdown to send a message to a specific role or all staff.`;
+            }
+            if (userPrompt.includes('memos') || userPrompt.includes('reports')) {
+                return `Managers can use the 'Memos & Reports' section to generate official communication or performance reports.`;
+            }
+            return `I am still learning. Please ask me about staff roles, task management, or tokens.`;
+        }
+
+        async function processClientRequest(request) {
+            const systemPrompt = "You are a hotel management system 'Pilot'. Your task is to translate client requests into a structured JSON task object. The JSON should have three keys: 'description' (a string of the task), 'department' (a string, one of 'housekeeping', 'maintenance', 'front_desk', 'concierge', or 'eco'), and 'priority' (a string, one of 'high', 'medium', or 'low'). For tasks involving repairs or urgent needs, set priority to 'high'. For standard requests like extra towels, use 'medium'. For general inquiries, use 'low'. For eco-related requests, use department 'eco'.";
+            const userQuery = `A client requests: "${request}"`;
+            
+            const payload = {
+                contents: [{ parts: [{ text: userQuery }] }],
+                systemInstruction: { parts: [{ text: systemPrompt }] },
+                generationConfig: {
+                    responseMimeType: "application/json",
+                    responseSchema: {
+                        type: "OBJECT",
+                        properties: {
+                            "description": { "type": "STRING" },
+                            "department": { "type": "STRING" },
+                            "priority": { "type": "STRING" }
+                        },
+                        "propertyOrdering": ["description", "department", "priority"]
+                    }
+                }
+            };
+
+            const apiKey = "";
+            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${apiKey}`;
+
+            try {
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                if (!response.ok) {
+                    throw new Error(`API call failed: ${response.status} ${response.statusText}`);
+                }
+
+                const result = await response.json();
+                const jsonText = result?.candidates?.[0]?.content?.parts?.[0]?.text;
+                if (jsonText) {
+                    const task = JSON.parse(jsonText);
+                    await addGeneratedTask(task);
+                    renderClientChat("Request received and translated to a task.", "pilot");
+                    displayMessage('Task created from client request!', '#4f46e5');
+                } else {
+                    throw new Error("Invalid response format from Pilot.");
+                }
+            } catch (error) {
+                console.error("Error processing client request:", error);
+                renderClientChat("Sorry, I could not process that request.", "pilot");
+            }
+        }
+
+
+        // Event Listeners
+        hotelSelector.addEventListener('change', async (e) => {
+            await setHotel(e.target.value);
+            renderChat();
+        });
+
+        roleSelector.addEventListener('change', (e) => {
+            currentUser = currentHotel.staff_profiles.find(p => p.role === e.target.value);
+            renderDashboard();
+            renderChat();
+        });
+
+        sendMessageBtn.addEventListener('click', async () => {
+            const message = chatInput.value.trim();
+            const recipient = recipientSelect.value;
+            if (message) {
+                await addChatCommunication(message, recipient);
+                chatInput.value = '';
+            }
+        });
+
+        sendPilotMessageBtn.addEventListener('click', () => {
+            const userPrompt = pilotChatInput.value.trim();
+            if (userPrompt) {
+                renderPilotChat(userPrompt, 'user');
+                const pilotResponse = generatePilotResponse(userPrompt);
+                setTimeout(() => { renderPilotChat(pilotResponse, 'pilot'); }, 500);
+                pilotChatInput.value = '';
+            }
+        });
+
+        sendClientMessageBtn.addEventListener('click', async () => {
+            const clientRequest = clientChatInput.value.trim();
+            if (clientRequest) {
+                renderClientChat(clientRequest, "client");
+                clientChatInput.value = '';
+                await processClientRequest(clientRequest);
+            }
+        });
+
+        logEcoActionBtn.addEventListener('click', async () => {
+            await updateTokens(currentUser.id, 25);
+            const taskRef = collection(db, `/artifacts/${appId}/public/data/hotels/${currentHotel.id}/tasks`);
+            const newEcoActionTask = { type: "eco_action", priority: "low", description: "Logged an eco-friendly action.", status: "completed", assigned_to: currentUser.name, department: currentUser.department };
+            await addDoc(taskRef, newEcoActionTask);
+            displayMessage('Eco-friendly action logged! +25 Tokens', '#10b981');
+        });
+
+        logEcoMarketingBtn.addEventListener('click', async () => {
+            await updateTokens(currentUser.id, 50);
+            displayMessage('Eco-marketing effort logged! +50 Tokens', '#4f46e5');
+        });
+
+        generateMemoBtn.addEventListener('click', async () => {
+            const title = `Memo from ${currentUser.name} - ${new Date().toLocaleDateString()}`;
+            const content = `This is a new memo generated for all staff. Please take note of the upcoming training session on eco-friendly best practices on Thursday at 2 PM in the main conference room.`;
+            await addMemoOrReport("memo", title, content);
+            displayMessage('New Memo Generated!', '#4b5563');
+        });
+
+        generateReportBtn.addEventListener('click', async () => {
+            const totalTokens = currentHotel.staff_profiles.reduce((sum, p) => sum + p.tokens, 0);
+            const completedTasks = currentHotel.tasks.filter(t => t.status === 'completed').length;
+            const pendingTasks = currentHotel.tasks.filter(t => t.status !== 'completed').length;
+            const topPerformer = currentHotel.staff_profiles.sort((a,b) => b.tokens - a.tokens)[0].name;
+
+            const reportContent = `
+Hotel Performance Report
+Date: ${new Date().toLocaleDateString()}
+
+- Total Tokens Awarded: ${totalTokens}
+- Tasks Completed: ${completedTasks}
+- Tasks Pending: ${pendingTasks}
+- Top Performer (by tokens): ${topPerformer}
+- Guest Review Score: 4.8/5.0
+            `;
+            const title = `Quarterly Performance Report - ${new Date().toLocaleDateString()}`;
+            await addMemoOrReport("report", title, reportContent);
+            displayMessage('Report Generated!', '#4b5563');
+        });
+
+        // Initial setup
+        window.onload = async function() {
+            try {
+                const firebaseConfig = JSON.parse(typeof __firebase_config !== 'undefined' ? __firebase_config : '{}');
+                appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+                const app = initializeApp(firebaseConfig);
+                db = getFirestore(app);
+                auth = getAuth(app);
+
+                onAuthStateChanged(auth, async (user) => {
+                    if (user) {
+                        userId = user.uid;
+                        await fetchHotelDataAndListen();
+                    } else {
+                        if (typeof __initial_auth_token !== 'undefined') {
+                            await signInWithCustomToken(auth, __initial_auth_token);
+                        } else {
+                            await signInAnonymously(auth);
+                        }
+                    }
+                });
+
+            } catch (error) {
+                console.error("Firebase initialization failed:", error);
+            }
+        };
+    </script>
+</body>
+</html>

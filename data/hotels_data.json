@@ -1,0 +1,212 @@
+[
+  {
+    "hotel_id": "hotel_1",
+    "name": "The Budget Traveler Inn",
+    "class": "low",
+    "pms_details": {
+      "name": "BasicStay v1.0",
+      "description": "A manual, checklist-based system. Guest data is minimal, focusing on check-in/out and room allocation. The pilot engine integration is a shared tablet at the front desk where staff manually log guest requests and eco-actions. The pilot suggests basic eco-actions like 'no housekeeping' during check-in, but tracking is done manually.",
+      "pilot_integration": {
+        "preferences": "Manual notes are added to a simple text field in the guest profile.",
+        "budget_tracking": "No budget tracking. Pilot suggestions are generic and not based on expenditure.",
+        "group_matching": "Groups are identified manually; no automated suggestions for shared activities."
+      }
+    }
+  },
+  {
+    "hotel_id": "hotel_2",
+    "name": "Urban Escape Suites",
+    "class": "mid",
+    "pms_details": {
+      "name": "GuestLink Pro",
+      "description": "A semi-automated system with a guest-facing web portal. Guests can check in online, request services, and review their stay. The pilot engine is integrated into this portal, analyzing service requests and reviews. It sends automated notifications to staff via a central dashboard.",
+      "pilot_integration": {
+        "preferences": "The system tracks amenities requested (e.g., extra pillows, specific coffee). Pilot suggestions are based on a simple preference log.",
+        "budget_tracking": "Tracks basic expenditure (e.g., bar, restaurant, spa). Pilot suggests mid-range dining or activities based on previous spending.",
+        "group_matching": "Identifies groups from the booking and sends a single, shared list of mid-range activities."
+      }
+    }
+  },
+  {
+    "hotel_id": "hotel_3",
+    "name": "The High-End Retreat",
+    "class": "high",
+    "pms_details": {
+      "name": "Elysium AI Suite",
+      "description": "A fully AI-driven system that uses guest behavior, social media, and concierge notes to build a comprehensive profile. The pilot engine is a core component, proactively identifying opportunities for personalized service and eco-actions. All staff have dedicated apps that provide real-time updates and predictive alerts.",
+      "pilot_integration": {
+        "preferences": "Pilot proactively suggests room settings (lighting, music, temperature) and activities based on past behavior and reviews. It also learns from guest interactions with the in-room assistant.",
+        "budget_tracking": "Tracks detailed expenditure across all hotel services. Pilot uses this data to suggest exclusive experiences or services within the client's spending comfort zone.",
+        "group_matching": "Uses a 'social graph' to match clients with similar spending habits or interests for shared experiences, such as a private wine tasting or golf session."
+      }
+    }
+  },
+  {
+    "hotel_id": "hotel_4",
+    "name": "Eco-Lodge Haven",
+    "class": "mid",
+    "pms_details": {
+      "name": "GreenStays",
+      "description": "A system focused on sustainability. Its core feature is a dashboard that visualizes energy and water savings from guests' eco-actions. The pilot engine is deeply integrated to track these actions, calculate rewards based on impact, and send real-time 'eco-tips' to the guest's mobile device.",
+      "pilot_integration": {
+        "preferences": "Focuses on eco-preferences. Tracks if a guest prefers plant-based meals or reusable amenities. Pilot suggests local, sustainable activities.",
+        "budget_tracking": "Monitors spending on green services. Pilot suggests further eco-friendly experiences that align with the guest's spending behavior.",
+        "group_matching": "Facilitates group eco-actions, such as local community clean-ups or park volunteer days, and rewards the entire group."
+      }
+    }
+  },
+  {
+    "hotel_id": "hotel_5",
+    "name": "The Grand Heritage",
+    "class": "high",
+    "pms_details": {
+      "name": "RegalSuite",
+      "description": "A classic, robust system prioritizing luxury service. The pilot engine is an 'invisible assistant' that uses sentiment analysis on review data and direct guest communication. It proactively flags potential issues to the management team and suggests ways to preemptively enhance the guest's stay.",
+      "pilot_integration": {
+        "preferences": "The system tracks past requests and notes from staff. The pilot identifies trends and suggests proactive gestures, such as ensuring a favorite wine is in the room upon check-in.",
+        "budget_tracking": "Monitors high-end purchases. Pilot suggests bespoke experiences, such as a private chef dinner, that match the client's premium spending habits.",
+        "group_matching": "Analyzes group interests from booking details and concierge requests. The pilot suggests tailored group activities like a private historical tour or a bespoke cooking class."
+      }
+    }
+  },
+  {
+    "hotel_id": "hotel_6",
+    "name": "The Downtown Hostel",
+    "class": "low",
+    "pms_details": {
+      "name": "HostelHub",
+      "description": "A simple, mobile-first system designed for backpackers. Guests manage their check-in and room access via their phone. The pilot engine is a basic chatbot integrated into the app that handles frequently asked questions and guides guests to nearby food or transport options. Rewards are basic and instant.",
+      "pilot_integration": {
+        "preferences": "Guest preferences are basic and self-reported. The pilot provides generic suggestions based on common backpacker needs.",
+        "budget_tracking": "No budget tracking. The pilot primarily suggests free or low-cost activities and dining.",
+        "group_matching": "The system tracks guests in shared dorms. The pilot suggests shared activities, like a free walking tour, to promote a community feel."
+      }
+    }
+  },
+  {
+    "hotel_id": "hotel_7",
+    "name": "Riverside Inn & Suites",
+    "class": "mid",
+    "pms_details": {
+      "name": "StayFlow",
+      "description": "A user-friendly system for staff. It automates housekeeping and maintenance requests. The pilot engine functions as a central communication hub, translating guest requests into clear tasks for staff and providing real-time updates to both parties. It also tracks the completion of eco-actions.",
+      "pilot_integration": {
+        "preferences": "Tracks guest feedback on service. The pilot learns from this and prioritizes staff attention to guests with a history of specific complaints.",
+        "budget_tracking": "Monitors spending on paid services. The pilot suggests upgrades or complementary services within a reasonable price range.",
+        "group_matching": "The pilot analyzes group booking data and provides staff with a list of group-friendly amenities or activities available at the hotel."
+      }
+    }
+  },
+  {
+    "hotel_id": "hotel_8",
+    "name": "The Artisan Hotel",
+    "class": "high",
+    "pms_details": {
+      "name": "ArtisanOS",
+      "description": "A highly customized system. It uses computer vision to track guest movement in common areas and predicts service needs. The pilot engine is an advanced assistant that anticipates needs and proactively manages the guest experience. It suggests unique, high-end, artistic, or cultural experiences.",
+      "pilot_integration": {
+        "preferences": "Learns from every guest interaction. The pilot suggests personalized experiences, such as a private gallery tour or a workshop with a local artisan, based on inferred interests.",
+        "budget_tracking": "Tracks high-end spending. The pilot recommends premium services and exclusive opportunities, such as buying original art from local artists in residence.",
+        "group_matching": "Analyzes a group's combined interests to suggest a highly curated and memorable shared experience."
+      }
+    }
+  },
+  {
+    "hotel_id": "hotel_9",
+    "name": "Family Fun Hotel",
+    "class": "mid",
+    "pms_details": {
+      "name": "FamilyFlow",
+      "description": "A system tailored for families. It provides a simple app for parents to manage their stay, including requests for cribs or high chairs, and offers a children's activity schedule. The pilot engine focuses on ensuring a smooth, hassle-free stay for families by automating common requests.",
+      "pilot_integration": {
+        "preferences": "Tracks family-specific preferences (e.g., adjacent rooms, child-friendly meals). The pilot uses this to optimize family service.",
+        "budget_tracking": "Monitors family spending on attractions and food. The pilot suggests family-friendly activities and budget-conscious dining options.",
+        "group_matching": "The pilot suggests activities for families with similar-aged children to facilitate shared playdates."
+      }
+    }
+  },
+  {
+    "hotel_id": "hotel_10",
+    "name": "The Business Hub",
+    "class": "high",
+    "pms_details": {
+      "name": "Corporate Connect",
+      "description": "A system designed for corporate travelers. It automates meeting room bookings, expense tracking, and provides a streamlined check-in process. The pilot engine is a productivity tool, sending personalized work-related reminders and alerts and integrating with professional networking apps.",
+      "pilot_integration": {
+        "preferences": "Learns business preferences (e.g., preferred meeting room setup, coffee type). The pilot anticipates these needs and has everything ready upon arrival.",
+        "budget_tracking": "Tracks corporate expenditure. The pilot provides detailed reports and can suggest budget-friendly options.",
+        "group_matching": "The pilot can match business travelers with similar professional interests for networking events."
+      }
+    }
+  },
+  {
+    "hotel_id": "hotel_11",
+    "name": "The Backpacker's Rest",
+    "class": "low",
+    "pms_details": {
+      "name": "HostelManager",
+      "description": "A very basic system for managing room allocation. Communication is primarily face-to-face. The pilot engine is a simple, shared terminal at the front desk where staff can log guest requests. The pilot's eco-suggestions are simple and displayed on a screen in the common area.",
+      "pilot_integration": {
+        "preferences": "Preferences are tracked on a simple spreadsheet. The pilot gives basic suggestions based on this.",
+        "budget_tracking": "No budget tracking. The pilot's primary purpose is to suggest free or very cheap local attractions.",
+        "group_matching": "The pilot is not equipped for group matching."
+      }
+    }
+  },
+  {
+    "hotel_id": "hotel_12",
+    "name": "The Wellness Center",
+    "class": "mid",
+    "pms_details": {
+      "name": "Zenith",
+      "description": "A system focused on wellness and health. It allows guests to book spa treatments and fitness classes. The pilot engine tracks guest activity and preferences and provides a digital guide to all wellness offerings, including suggestions for nutrition and exercise routines.",
+      "pilot_integration": {
+        "preferences": "Tracks wellness preferences, such as dietary restrictions and favorite exercises. The pilot suggests personalized nutrition plans and activities.",
+        "budget_tracking": "Monitors spending on wellness services. The pilot can suggest packages or promotions that match the client's spending behavior.",
+        "group_matching": "The pilot can match clients with similar health goals for shared fitness classes or hiking groups."
+      }
+    }
+  },
+  {
+    "hotel_id": "hotel_13",
+    "name": "The Rustic Retreat",
+    "class": "low",
+    "pms_details": {
+      "name": "RetreatOS",
+      "description": "A simple, offline-first system for remote locations. Staff use a basic terminal to manage check-in and service requests. The pilot engine is a messaging service that alerts staff of eco-actions and special requests, with a focus on resource conservation.",
+      "pilot_integration": {
+        "preferences": "No advanced preference tracking. The pilot's main function is to support eco-friendly behavior.",
+        "budget_tracking": "No budget tracking.",
+        "group_matching": "The pilot can organize simple group activities like bonfire nights or nature walks."
+      }
+    }
+  },
+  {
+    "hotel_id": "hotel_14",
+    "name": "The Tech-Savvy Stay",
+    "class": "mid",
+    "pms_details": {
+      "name": "SmartStay",
+      "description": "A system that integrates with smart room technology. Guests control room settings via their phones. The pilot engine uses room data to offer suggestions (e.g., 'the AC has been running for 6 hours; would you like to turn it off?').",
+      "pilot_integration": {
+        "preferences": "Tracks room settings and energy consumption. Pilot can learn preferred settings and automatically apply them for a guest's future stays.",
+        "budget_tracking": "Monitors spending on digital services. The pilot can suggest upgrades or promotions based on usage.",
+        "group_matching": "The pilot can match clients with similar tech interests for shared workshops or hackathons."
+      }
+    }
+  },
+  {
+    "hotel_id": "hotel_15",
+    "name": "The Boutique Experience",
+    "class": "high",
+    "pms_details": {
+      "name": "BoutiqueOS",
+      "description": "A specialized system for a small, unique hotel. It focuses on personalized service and attention to detail. The pilot engine is a sophisticated concierge tool that learns about each client and makes proactive suggestions for local experiences and events.",
+      "pilot_integration": {
+        "preferences": "The pilot learns from all conversations and interactions to anticipate needs. It can surprise clients with personalized gifts or experiences.",
+        "budget_tracking": "Monitors spending on bespoke experiences. The pilot can suggest similar local, high-end boutiques or restaurants.",
+        "group_matching": "The pilot can match clients for exclusive, invite-only events or workshops based on shared interests."
+      }
+    }
+  }
+]

@@ -1,0 +1,837 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Eco-Pilot Client Assistant</title>
+    <link rel="manifest" href="/manifest.json">
+    <!-- Corrected: Add apple-touch-icon for iOS devices -->
+    <link rel="apple-touch-icon" href="https://placehold.co/180x180/0d9488/ffffff?text=EP">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap');
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f3f4f6;
+            background-image: url('https://images.unsplash.com/photo-1546252912-f17a58a75e2d?q=80&w=2670&auto=format&fit=crop');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+        }
+        .container {
+            max-width: 960px;
+            /* Corrected: Add -webkit-backdrop-filter for Safari compatibility */
+            -webkit-backdrop-filter: blur(10px);
+            backdrop-filter: blur(10px);
+            background-color: rgba(255, 255, 255, 0.7);
+        }
+        .audio-controls {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 1.5rem;
+        }
+        .audio-button {
+            background-color: rgba(255, 255, 255, 0.8);
+            border: 2px solid #e5e7eb;
+            color: #4b5563;
+            padding: 0.5rem 1rem;
+            border-radius: 9999px;
+            transition: all 0.3s ease;
+        }
+        .audio-button:hover {
+            background-color: #f3f4f6;
+            transform: scale(1.05);
+        }
+        .message-box {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 1rem 2rem;
+            border-radius: 9999px;
+            background-color: #4b5563;
+            color: #fff;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.5s ease, visibility 0.5s ease;
+        }
+        .message-box.show {
+            opacity: 1;
+            visibility: visible;
+        }
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 min-h-screen flex items-center justify-center p-4 sm:p-6">
+    <div class="container mx-auto p-6 shadow-xl rounded-2xl border border-gray-200">
+        <header class="text-center mb-8">
+            <h1 class="text-3xl sm:text-4xl font-bold text-gray-800">Eco-Pilot Client Assistant</h1>
+            <p class="mt-2 text-gray-700">Your connection to a sustainable stay.</p>
+        </header>
+
+        <!-- 2FA Section -->
+        <section id="authSection">
+            <h2 class="text-xl font-semibold text-gray-700 mb-4 text-center">Authentication Required</h2>
+            <div class="space-y-4">
+                <div>
+                    <label for="verificationCode" class="block text-sm font-medium text-gray-700 mb-2">Enter Verification Code:</label>
+                    <input type="text" id="verificationCode" class="w-full p-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors duration-200 bg-white/70" placeholder="e.g., 123456">
+                </div>
+                <button id="verifyButton" class="w-full bg-green-600 text-white font-bold py-3 px-6 rounded-lg shadow-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition-all duration-300">
+                    Verify
+                </button>
+            </div>
+        </section>
+
+        <!-- Main App Content -->
+        <section id="appContent" class="hidden">
+            <!-- Audio controls -->
+            <div class="audio-controls">
+                <button id="audioButton" class="audio-button">
+                    <span id="audioIcon">▶️</span>
+                    <span id="audioText">Play Ambient Music</span>
+                </button>
+                <audio id="backgroundMusic" loop>
+                    <source src="https://cdn.pixabay.com/audio/2023/10/26/audio_f53833efb1.mp3" type="audio/mpeg">
+                    Your browser does not support the audio element.
+                </audio>
+            </div>
+
+            <section class="mb-8">
+                <div class="bg-white/50 p-6 rounded-xl border border-gray-300">
+                    <div class="flex items-center justify-between mb-4">
+                        <h2 class="text-xl font-semibold text-gray-700">Your Profile</h2>
+                        <span id="tokenCount" class="text-2xl font-bold text-green-600">0 Tokens</span>
+                    </div>
+                    <p id="userIdDisplay" class="text-sm font-mono text-gray-600 truncate">User ID: N/A</p>
+                </div>
+            </section>
+
+            <!-- Tabbed Interface -->
+            <div class="flex flex-col sm:flex-row bg-white/50 rounded-xl border border-gray-300 overflow-hidden">
+                <div class="flex flex-row sm:flex-col p-4 space-x-4 sm:space-x-0 sm:space-y-4 border-b sm:border-b-0 sm:border-r border-gray-300">
+                    <button id="requestsTabBtn" class="py-2 px-4 rounded-lg font-medium text-gray-700 bg-gray-200 transition-colors duration-200 hover:bg-gray-300">Requests</button>
+                    <button id="paymentTabBtn" class="py-2 px-4 rounded-lg font-medium text-gray-700 bg-transparent transition-colors duration-200 hover:bg-gray-300">Payment</button>
+                    <button id="exploreTabBtn" class="py-2 px-4 rounded-lg font-medium text-gray-700 bg-transparent transition-colors duration-200 hover:bg-gray-300">Explore</button>
+                </div>
+                <div class="flex-1 p-6">
+                    <!-- Requests Tab Content -->
+                    <div id="requestsTab" class="tab-content">
+                        <h2 class="text-xl font-semibold text-gray-700 mb-4">Make a Request</h2>
+                        <div class="space-y-4">
+                            <div>
+                                <label for="requestQuery" class="block text-sm font-medium text-gray-700 mb-2">Enter your query:</label>
+                                <textarea id="requestQuery" rows="4" class="w-full p-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors duration-200 bg-white/70" placeholder="e.g., I would like my room cleaned, please."></textarea>
+                            </div>
+                            <div class="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4">
+                                <button id="submitButton" class="w-full sm:w-1/2 bg-green-600 text-white font-bold py-3 px-6 rounded-lg shadow-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition-all duration-300">
+                                    Submit Request
+                                </button>
+                                <button id="speakButton" class="w-full sm:w-1/2 bg-blue-600 text-white font-bold py-3 px-6 rounded-lg shadow-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-all duration-300">
+                                    <span id="speakText">Speak with Pilot</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Payment Tab Content -->
+                    <div id="paymentTab" class="tab-content hidden">
+                        <h2 class="text-xl font-semibold text-gray-700 mb-4">Pay for a Service</h2>
+                        <div class="space-y-4">
+                            <div>
+                                <label for="serviceName" class="block text-sm font-medium text-gray-700 mb-2">Service Name:</label>
+                                <input type="text" id="serviceName" class="w-full p-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors duration-200 bg-white/70" placeholder="e.g., Spa Treatment, Room Service">
+                            </div>
+                            <div>
+                                <label for="serviceCost" class="block text-sm font-medium text-gray-700 mb-2">Cost ($):</label>
+                                <input type="number" id="serviceCost" class="w-full p-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors duration-200 bg-white/70" placeholder="e.g., 75">
+                            </div>
+                            <button id="payButton" class="w-full bg-indigo-600 text-white font-bold py-3 px-6 rounded-lg shadow-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition-all duration-300">
+                                Pay Now
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Explore Tab Content -->
+                    <div id="exploreTab" class="tab-content hidden">
+                        <h2 class="text-xl font-semibold text-gray-700 mb-4">Explore & Discover</h2>
+                        <div class="space-y-4">
+                            <div>
+                                <label for="exploreQuery" class="block text-sm font-medium text-gray-700 mb-2">Tell us what you're interested in:</label>
+                                <textarea id="exploreQuery" rows="4" class="w-full p-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-purple-500 focus:focus:border-purple-500 transition-colors duration-200 bg-white/70" placeholder="e.g., Suggest some local hiking trails or spa treatments."></textarea>
+                            </div>
+                            <button id="exploreButton" class="w-full bg-purple-600 text-white font-bold py-3 px-6 rounded-lg shadow-md hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 transition-all duration-300">
+                                Explore
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Amenities Section -->
+            <hr class="my-8 border-gray-400">
+            <section id="amenitiesSection" class="hidden">
+                <h2 class="text-xl font-semibold text-gray-700 mb-4">Our Amenities</h2>
+                <div id="amenitiesGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <!-- Amenities will be dynamically inserted here -->
+                </div>
+            </section>
+        </section>
+
+        <div id="statusMessage" class="message-box"></div>
+    </div>
+
+    <script type="module">
+        // Firebase and general imports
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, collection, doc, onSnapshot, updateDoc, increment, addDoc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { setLogLevel } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+
+        // Set Firebase debug logs
+        setLogLevel('debug');
+
+        // Global variables for Firebase configuration, provided by the runtime environment
+        // NOTE: These variables are assumed to be provided by the hosting environment.
+        const appId = __app_id;
+        const firebaseConfig = JSON.parse(__firebase_config);
+        const initialAuthToken = __initial_auth_token;
+
+        let db, auth, userId;
+
+        // Initialize Firebase app and services
+        const app = initializeApp(firebaseConfig);
+        db = getFirestore(app);
+        auth = getAuth(app);
+
+        // DOM elements
+        const authSection = document.getElementById('authSection');
+        const appContent = document.getElementById('appContent');
+        const verificationCodeInput = document.getElementById('verificationCode');
+        const verifyButton = document.getElementById('verifyButton');
+        const requestQueryTextarea = document.getElementById('requestQuery');
+        const submitButton = document.getElementById('submitButton');
+        const speakButton = document.getElementById('speakButton');
+        const speakText = document.getElementById('speakText');
+        const statusMessage = document.getElementById('statusMessage');
+        const tokenCountDisplay = document.getElementById('tokenCount');
+        const userIdDisplay = document.getElementById('userIdDisplay');
+        const audioButton = document.getElementById('audioButton');
+        const backgroundMusic = document.getElementById('backgroundMusic');
+        const audioIcon = document.getElementById('audioIcon');
+        const audioText = document.getElementById('audioText');
+        const requestsTabBtn = document.getElementById('requestsTabBtn');
+        const paymentTabBtn = document.getElementById('paymentTabBtn');
+        const exploreTabBtn = document.getElementById('exploreTabBtn');
+        const requestsTab = document.getElementById('requestsTab');
+        const paymentTab = document.getElementById('paymentTab');
+        const exploreTab = document.getElementById('exploreTab');
+        const serviceNameInput = document.getElementById('serviceName');
+        const serviceCostInput = document.getElementById('serviceCost');
+        const payButton = document.getElementById('payButton');
+        const exploreQueryTextarea = document.getElementById('exploreQuery');
+        const exploreButton = document.getElementById('exploreButton');
+        const amenitiesSection = document.getElementById('amenitiesSection');
+        const amenitiesGrid = document.getElementById('amenitiesGrid');
+
+        // --- Utility Functions ---
+        // Implement a retry mechanism with exponential backoff for API calls
+        async function fetchWithRetry(url, options, retries = 3, delay = 1000) {
+            try {
+                const response = await fetch(url, options);
+                if (!response.ok) {
+                    const errorDetails = `API error: ${response.status} ${response.statusText}`;
+                    console.error(errorDetails);
+                    if (retries > 0 && (response.status === 429 || response.status >= 500)) {
+                        console.warn(`Retrying in ${delay}ms...`);
+                        await new Promise(resolve => setTimeout(resolve, delay));
+                        return fetchWithRetry(url, options, retries - 1, delay * 2);
+                    } else {
+                        throw new Error(errorDetails);
+                    }
+                }
+                return response;
+            } catch (error) {
+                if (retries > 0) {
+                    console.warn(`Fetch failed due to network error. Retrying in ${delay}ms...`);
+                    await new Promise(resolve => setTimeout(resolve, delay));
+                    return fetchWithRetry(url, options, retries - 1, delay * 2);
+                }
+                throw error;
+            }
+        }
+
+        // --- Audio and TTS Functions ---
+        let audioContext, audioSource, audioBuffer;
+
+        // Helper function to convert base64 to ArrayBuffer
+        function base64ToArrayBuffer(base64) {
+            const binaryString = window.atob(base64);
+            const len = binaryString.length;
+            const bytes = new Uint8Array(len);
+            for (let i = 0; i < len; i++) {
+                bytes[i] = binaryString.charCodeAt(i);
+            }
+            return bytes.buffer;
+        }
+
+        // Helper function to create WAV blob from PCM data
+        function pcmToWav(pcmData, sampleRate) {
+            const dataLength = pcmData.length * 2;
+            const buffer = new ArrayBuffer(44 + dataLength);
+            const view = new DataView(buffer);
+            let offset = 0;
+
+            function writeString(str) {
+                for (let i = 0; i < str.length; i++) {
+                    view.setUint8(offset + i, str.charCodeAt(i));
+                }
+                offset += str.length;
+            }
+
+            function writeUint32(val) {
+                view.setUint32(offset, val, true);
+                offset += 4;
+            }
+
+            function writeUint16(val) {
+                view.setUint16(offset, val, true);
+                offset += 2;
+            }
+
+            writeString('RIFF');
+            writeUint32(36 + dataLength);
+            writeString('WAVE');
+            writeString('fmt ');
+            writeUint32(16);
+            writeUint16(1);
+            writeUint16(1);
+            writeUint32(sampleRate);
+            writeUint32(sampleRate * 2);
+            writeUint16(2);
+            writeUint16(16);
+            writeString('data');
+            writeUint32(dataLength);
+
+            for (let i = 0; i < pcmData.length; i++) {
+                view.setInt16(offset, pcmData[i], true);
+                offset += 2;
+            }
+
+            return new Blob([view], { type: 'audio/wav' });
+        }
+
+        // Function to make the TTS API call and play the audio
+        async function speakWithPilot(textToSpeak) {
+            if (!audioContext) {
+                audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            }
+            speakButton.disabled = true;
+            speakText.textContent = 'Speaking...';
+
+            try {
+                const payload = {
+                    contents: [{ parts: [{ text: textToSpeak }] }],
+                    generationConfig: {
+                        responseModalities: ["AUDIO"],
+                        speechConfig: {
+                            voiceConfig: {
+                                prebuiltVoiceConfig: { voiceName: "Kore" }
+                            }
+                        }
+                    },
+                    model: "gemini-2.5-flash-preview-tts"
+                };
+
+                const apiKey = "";
+                const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-tts:generateContent?key=${apiKey}`;
+
+                const response = await fetchWithRetry(apiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                const result = await response.json();
+                const part = result?.candidates?.[0]?.content?.parts?.[0];
+                const audioData = part?.inlineData?.data;
+                const mimeType = part?.inlineData?.mimeType;
+
+                if (audioData && mimeType && mimeType.startsWith("audio/")) {
+                    const sampleRateMatch = mimeType.match(/rate=(\d+)/);
+                    const sampleRate = sampleRateMatch ? parseInt(sampleRateMatch[1], 10) : 16000;
+
+                    const pcmBuffer = base64ToArrayBuffer(audioData);
+                    const pcm16 = new Int16Array(pcmBuffer);
+                    const wavBlob = pcmToWav(pcm16, sampleRate);
+
+                    const audioUrl = URL.createObjectURL(wavBlob);
+                    const audio = new Audio(audioUrl);
+                    audio.onended = () => {
+                        speakButton.disabled = false;
+                        speakText.textContent = 'Speak with Pilot';
+                    };
+                    audio.play();
+                } else {
+                    displayMessage('Failed to get audio data.', 'text-red-500');
+                    speakButton.disabled = false;
+                    speakText.textContent = 'Speak with Pilot';
+                }
+
+            } catch (error) {
+                console.error("Error with TTS:", error);
+                displayMessage('An error occurred with the voice pilot.', 'text-red-500');
+                speakButton.disabled = false;
+                speakText.textContent = 'Speak with Pilot';
+            }
+        }
+
+        // --- Firebase and Core Logic ---
+
+        // Handles user sign-in and real-time data listener
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                userId = user.uid;
+                userIdDisplay.textContent = `User ID: ${userId}`;
+                console.log("Firebase Auth State Changed. User ID:", userId);
+                
+                // Mocking 2FA enrollment check
+                const isEnrolledFor2FA = true; // In a real app, this would be a user profile flag.
+
+                if (isEnrolledFor2FA) {
+                    authSection.classList.remove('hidden');
+                    appContent.classList.add('hidden');
+                } else {
+                    authSection.classList.add('hidden');
+                    appContent.classList.remove('hidden');
+                    listenForCustomerData();
+                }
+
+            } else {
+                console.log("User signed out or not authenticated. Attempting sign-in...");
+                try {
+                    if (initialAuthToken) {
+                        await signInWithCustomToken(auth, initialAuthToken);
+                        console.log("Signed in with custom token.");
+                    } else {
+                        await signInAnonymously(auth);
+                        console.log("Signed in anonymously.");
+                    }
+                } catch (error) {
+                    console.error("Firebase Auth error:", error.message);
+                }
+            }
+        });
+
+        // Listen for user data after successful authentication
+        function listenForCustomerData() {
+            const customerDocRef = doc(db, "artifacts", appId, "users", userId, "customers", userId);
+            onSnapshot(customerDocRef, (docSnap) => {
+                if (docSnap.exists()) {
+                    const profile = docSnap.data();
+                    const tokens = profile.tokens || 0;
+                    tokenCountDisplay.textContent = `${tokens} Tokens`;
+                    console.log("Customer profile updated:", profile);
+                } else {
+                    // Create a new customer profile if it doesn't exist
+                    setDoc(customerDocRef, { tokens: 0, isEnrolledFor2FA: true }).then(() => {
+                        console.log("New customer profile created.");
+                    }).catch(error => {
+                        console.error("Error creating new customer profile:", error);
+                    });
+                }
+            }, (error) => {
+                console.error("Error listening to customer profile:", error);
+            });
+        }
+
+        // --- Real Pilot Engine Implementation ---
+        async function generatePilotResponse(query) {
+            console.log("Engaging the real pilot engine...");
+            const apiKey = "";
+            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${apiKey}`;
+
+            const systemPrompt = `You are the Eco-Pilot, a helpful and engaging hotel assistant focused on providing excellent service and promoting sustainability. You are speaking to a guest staying at a hotel.
+            Your task is to analyze the guest's request and provide two things in a single JSON object:
+            1. A natural language response for the guest.
+            2. A structured task object for the hotel staff.
+
+            The JSON object must have the following properties:
+            - "guest_response": A concise and helpful response to the guest's query.
+            - "task": An object with the following properties:
+                - "type": A string representing the task category. Use one of these predefined values: "housekeeping", "maintenance", "service_request", "special_request", "procurement", "accounting", "general_inquiry", "other".
+                - "priority": A string representing the task's urgency. Use one of these predefined values: "low", "medium", "high".
+                - "description": A detailed summary of the guest's request for the staff.
+
+            Example JSON format:
+            {
+              "guest_response": "I have requested housekeeping to clean your room. They will be there shortly.",
+              "task": {
+                "type": "housekeeping",
+                "priority": "high",
+                "description": "Guest requested room cleaning."
+              }
+            }
+            
+            Always try to suggest eco-friendly alternatives or highlight eco-friendly features of the hotel when relevant in the "guest_response".
+            Do not include any text outside of the JSON object. The system will handle the rest.`;
+
+            const payload = {
+                contents: [{ parts: [{ text: query }] }],
+                tools: [{ "google_search": {} }],
+                systemInstruction: {
+                    parts: [{ text: systemPrompt }]
+                },
+                generationConfig: {
+                    responseMimeType: "application/json",
+                    responseSchema: {
+                        type: "OBJECT",
+                        properties: {
+                            guest_response: { type: "STRING" },
+                            task: {
+                                type: "OBJECT",
+                                properties: {
+                                    type: { type: "STRING" },
+                                    priority: { type: "STRING" },
+                                    description: { type: "STRING" }
+                                }
+                            }
+                        }
+                    }
+                }
+            };
+
+            const tasksCollection = collection(db, "artifacts", appId, "public", "data", "tasks");
+            let pilotResponseText = "Your request has been received. I am taking the necessary actions now. Please let me know if there is anything else.";
+
+            try {
+                const response = await fetchWithRetry(apiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                
+                const result = await response.json();
+                const jsonText = result?.candidates?.[0]?.content?.parts?.[0]?.text;
+                const parsedResult = JSON.parse(jsonText);
+
+                if (parsedResult && parsedResult.task) {
+                    const newTask = {
+                        hotel_id: 'mock_hotel_id',
+                        customer_id: userId,
+                        description: parsedResult.task.description,
+                        timestamp: new Date().toISOString(),
+                        priority: parsedResult.task.priority,
+                        status: "pending",
+                        type: parsedResult.task.type
+                    };
+                    await addDoc(tasksCollection, newTask);
+                    console.log("New task added to Firestore:", newTask);
+                }
+                
+                return parsedResult.guest_response || pilotResponseText;
+
+            } catch (error) {
+                console.error("Error with Gemini API or parsing JSON:", error);
+                return pilotResponseText;
+            }
+        }
+
+        // Function to generate and display amenities based on a user's query
+        async function generateExploreSuggestions(query) {
+            exploreButton.disabled = true;
+            exploreButton.textContent = 'Exploring...';
+            displayMessage('Finding personalized suggestions...', 'text-purple-500');
+
+            const apiKey = "";
+            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${apiKey}`;
+
+            const systemPrompt = `You are the Eco-Pilot, a helpful hotel concierge and local expert. Your task is to provide personalized suggestions for amenities, activities, or services based on a user's query. Provide the response as a single JSON object containing an array of 'suggestions'. Each suggestion object must have a 'name', a 'description' (a helpful, brief summary), and an 'image_url' (use a relevant placeholder image URL). The suggestions should be tailored to the user's input and incorporate eco-friendly elements where possible.
+
+            Example JSON format:
+            {
+              "suggestions": [
+                {
+                  "name": "Guided Safari Tour",
+                  "description": "Experience the savanna with our certified guides. Tours use electric vehicles to minimize our footprint.",
+                  "image_url": "https://images.unsplash.com/photo-1547476595-5813f8211029?q=80&w=2670&auto=format&fit=crop"
+                },
+                {
+                  "name": "Farm-to-Table Dining",
+                  "description": "Enjoy a culinary journey with ingredients sourced directly from local, sustainable farms.",
+                  "image_url": "https://images.unsplash.com/photo-1550965008-d218d6a8b7c7?q=80&w=2670&auto=format&fit=crop"
+                }
+              ]
+            }
+            Do not include any text outside of the JSON object.`;
+
+            const payload = {
+                contents: [{ parts: [{ text: query }] }],
+                systemInstruction: {
+                    parts: [{ text: systemPrompt }]
+                },
+                generationConfig: {
+                    responseMimeType: "application/json",
+                    responseSchema: {
+                        type: "OBJECT",
+                        properties: {
+                            suggestions: {
+                                type: "ARRAY",
+                                items: {
+                                    type: "OBJECT",
+                                    properties: {
+                                        name: { type: "STRING" },
+                                        description: { type: "STRING" },
+                                        image_url: { type: "STRING" }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            };
+
+            try {
+                const response = await fetchWithRetry(apiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                const result = await response.json();
+                const jsonText = result?.candidates?.[0]?.content?.parts?.[0]?.text;
+                const parsedResult = JSON.parse(jsonText);
+                
+                if (parsedResult && parsedResult.suggestions) {
+                    renderAmenities(parsedResult.suggestions);
+                    exploreQueryTextarea.value = '';
+                } else {
+                    displayMessage('Could not find any suggestions.', 'text-red-500');
+                }
+            } catch (error) {
+                console.error("Error with Gemini API or parsing JSON:", error);
+                displayMessage('An error occurred while exploring.', 'text-red-500');
+            } finally {
+                exploreButton.disabled = false;
+                exploreButton.textContent = 'Explore';
+            }
+        }
+        
+        // Function to render amenities from the API
+        function renderAmenities(suggestions) {
+            amenitiesGrid.innerHTML = '';
+            suggestions.forEach(amenity => {
+                const amenityCard = document.createElement('div');
+                amenityCard.className = 'bg-white/70 rounded-xl shadow-md overflow-hidden transition-transform duration-300 hover:scale-105';
+                amenityCard.innerHTML = `
+                    <img src="${amenity.image_url}" alt="${amenity.name}" class="w-full h-48 object-cover">
+                    <div class="p-4">
+                        <h3 class="text-lg font-semibold text-gray-800">${amenity.name}</h3>
+                        <p class="text-sm text-gray-600 mt-2">${amenity.description}</p>
+                        <button class="mt-4 w-full bg-indigo-600 text-white font-bold py-2 px-4 rounded-lg shadow-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition-all duration-300">
+                            Select Option
+                        </button>
+                    </div>
+                `;
+                amenitiesGrid.appendChild(amenityCard);
+            });
+            amenitiesSection.classList.remove('hidden');
+        }
+
+        // --- Event Listeners ---
+
+        // Function to display a temporary message
+        function displayMessage(message, color) {
+            statusMessage.textContent = message;
+            statusMessage.style.backgroundColor = color.includes('green') ? '#10b981' : (color.includes('red') ? '#ef4444' : (color.includes('indigo') ? '#4f46e5' : '#4b5563'));
+            statusMessage.style.color = '#fff';
+            statusMessage.classList.add('show');
+            setTimeout(() => {
+                statusMessage.classList.remove('show');
+            }, 3000);
+        }
+
+        // Event listener for 2FA verification button
+        verifyButton.addEventListener('click', async () => {
+            const code = verificationCodeInput.value.trim();
+            if (code === '123456') { // Mock verification
+                authSection.classList.add('hidden');
+                appContent.classList.remove('hidden');
+                displayMessage('Verification successful!', 'text-green-500');
+                listenForCustomerData();
+            } else {
+                displayMessage('Invalid verification code. Please try again.', 'text-red-500');
+            }
+        });
+
+        // Tab switching logic
+        function switchTab(tabName) {
+            // Deactivate all tabs and buttons
+            requestsTab.classList.add('hidden');
+            paymentTab.classList.add('hidden');
+            exploreTab.classList.add('hidden');
+            requestsTabBtn.classList.remove('bg-gray-200');
+            paymentTabBtn.classList.remove('bg-gray-200');
+            exploreTabBtn.classList.remove('bg-gray-200');
+
+            // Activate the selected tab and button
+            if (tabName === 'requests') {
+                requestsTab.classList.remove('hidden');
+                requestsTabBtn.classList.add('bg-gray-200');
+            } else if (tabName === 'payment') {
+                paymentTab.classList.remove('hidden');
+                paymentTabBtn.classList.add('bg-gray-200');
+            } else if (tabName === 'explore') {
+                exploreTab.classList.remove('hidden');
+                exploreTabBtn.classList.add('bg-gray-200');
+            }
+        }
+
+        requestsTabBtn.addEventListener('click', () => switchTab('requests'));
+        paymentTabBtn.addEventListener('click', () => switchTab('payment'));
+        exploreTabBtn.addEventListener('click', () => switchTab('explore'));
+
+        // Event listener for the submit button (text only)
+        submitButton.addEventListener('click', async () => {
+            const query = requestQueryTextarea.value.trim();
+            if (!query) {
+                displayMessage('Please enter a request.', 'text-red-500');
+                return;
+            }
+
+            if (!userId) {
+                displayMessage('Authentication not ready. Please wait.', 'text-red-500');
+                return;
+            }
+
+            submitButton.disabled = true;
+            submitButton.textContent = 'Submitting...';
+            displayMessage('Request in progress...', 'text-gray-500');
+
+            try {
+                const pilotResponse = await generatePilotResponse(query);
+                console.log("Pilot Response:", pilotResponse);
+                displayMessage('Request submitted successfully!', 'text-green-500');
+                requestQueryTextarea.value = '';
+
+            } catch (error) {
+                console.error("Error submitting request:", error);
+                displayMessage('Failed to submit request. Please try again.', 'text-red-500');
+            } finally {
+                submitButton.disabled = false;
+                submitButton.textContent = 'Submit Request';
+            }
+        });
+
+        // Event listener for the speak button (voice interaction)
+        speakButton.addEventListener('click', async () => {
+            const query = requestQueryTextarea.value.trim();
+            if (!query) {
+                displayMessage('Please enter a request to speak.', 'text-red-500');
+                return;
+            }
+            if (!userId) {
+                displayMessage('Authentication not ready. Please wait.', 'text-red-500');
+                return;
+            }
+
+            speakButton.disabled = true;
+            speakText.textContent = 'Thinking...';
+            displayMessage('Engaging the pilot...', 'text-gray-500');
+
+            try {
+                const pilotResponseText = await generatePilotResponse(query);
+                await speakWithPilot(pilotResponseText);
+
+                displayMessage('Pilot has responded.', 'text-green-500');
+                requestQueryTextarea.value = '';
+
+            } catch (error) {
+                console.error("Error with voice interaction:", error);
+                displayMessage('Failed to get voice response.', 'text-red-500');
+            } finally {
+                speakButton.disabled = false;
+                speakText.textContent = 'Speak with Pilot';
+            }
+        });
+
+        // Event listener for explore button
+        exploreButton.addEventListener('click', async () => {
+            const query = exploreQueryTextarea.value.trim();
+            if (!query) {
+                displayMessage('Please enter a query to explore.', 'text-red-500');
+                return;
+            }
+            await generateExploreSuggestions(query);
+        });
+
+        // Event listener for audio play/pause
+        audioButton.addEventListener('click', () => {
+            if (backgroundMusic.paused) {
+                backgroundMusic.play();
+                audioIcon.textContent = '⏸️';
+                audioText.textContent = 'Pause Ambient Music';
+            } else {
+                backgroundMusic.pause();
+                audioIcon.textContent = '▶️';
+                audioText.textContent = 'Play Ambient Music';
+            }
+        });
+
+        // Event listener for the pay button
+        payButton.addEventListener('click', async () => {
+            const serviceName = serviceNameInput.value.trim();
+            const serviceCost = parseFloat(serviceCostInput.value);
+
+            if (!serviceName || isNaN(serviceCost) || serviceCost <= 0) {
+                displayMessage('Please enter a valid service name and cost.', 'text-red-500');
+                return;
+            }
+
+            if (!userId) {
+                displayMessage('Authentication not ready. Please wait.', 'text-red-500');
+                return;
+            }
+
+            payButton.disabled = true;
+            payButton.textContent = 'Processing...';
+            displayMessage('Processing payment...', 'text-indigo-500');
+
+            try {
+                // Simulate payment success and create a new task for staff
+                const newServiceTask = {
+                    hotel_id: 'mock_hotel_id',
+                    customer_id: userId,
+                    description: `Payment for service: ${serviceName}`,
+                    cost: serviceCost,
+                    timestamp: new Date().toISOString(),
+                    priority: "High",
+                    status: "paid"
+                };
+
+                const tasksCollection = collection(db, "artifacts", appId, "public", "data", "tasks");
+                await addDoc(tasksCollection, newServiceTask);
+
+                // Update user tokens (e.g., as a reward for using the app's payment system)
+                const customerDocRef = doc(db, "artifacts", appId, "users", userId, "customers", userId);
+                await updateDoc(customerDocRef, { tokens: increment(serviceCost * 0.1) });
+
+                displayMessage(`Payment for ${serviceName} successful! A staff member has been notified.`, 'text-green-500');
+                serviceNameInput.value = '';
+                serviceCostInput.value = '';
+            } catch (error) {
+                console.error("Error processing payment:", error);
+                displayMessage('Payment failed. Please try again.', 'text-red-500');
+            } finally {
+                payButton.disabled = false;
+                payButton.textContent = 'Pay Now';
+            }
+        });
+    </script>
+</body>
+</html>

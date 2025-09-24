@@ -1,0 +1,107 @@
+[
+  {
+    "id": "hotel_1",
+    "name": "Eco-Haven Hotel",
+    "description": "A sanctuary built on sustainable practices, focusing on water conservation and locally sourced food.",
+    "amenities": ["recycling bins", "eco-friendly products", "motion-activated lighting"],
+    "management_system": "Eco-Friendly & Sustainable"
+  },
+  {
+    "id": "hotel_2",
+    "name": "Green Leaf Lodge",
+    "description": "Committed to sustainability with every stay, featuring water conservation and locally sourced food.",
+    "amenities": ["recycling bins", "eco-friendly products", "motion-activated lighting"],
+    "management_system": "Eco-Friendly & Sustainable"
+  },
+  {
+    "id": "hotel_3",
+    "name": "The Earth Sanctuary",
+    "description": "An eco-conscious retreat, with a focus on sustainable practices, water conservation, and locally sourced food.",
+    "amenities": ["recycling bins", "eco-friendly products", "motion-activated lighting"],
+    "management_system": "Eco-Friendly & Sustainable"
+  },
+  {
+    "id": "hotel_4",
+    "name": "The Personalized Inn",
+    "description": "Where every guest is known by name. We highlight concierge services, a personalized welcome, and a rapid response team.",
+    "amenities": ["dedicated concierge", "24/7 front desk", "guest feedback kiosks"],
+    "management_system": "Guest Experience-Centric"
+  },
+  {
+    "id": "hotel_5",
+    "name": "The Concierge Retreat",
+    "description": "An unparalleled guest experience, highlighted by personalized concierge services and a rapid response team.",
+    "amenities": ["dedicated concierge", "24/7 front desk", "guest feedback kiosks"],
+    "management_system": "Guest Experience-Centric"
+  },
+  {
+    "id": "hotel_6",
+    "name": "The Guest First Hotel",
+    "description": "Dedicated to a seamless guest experience with a personalized welcome and a rapid response team.",
+    "amenities": ["dedicated concierge", "24/7 front desk", "guest feedback kiosks"],
+    "management_system": "Guest Experience-Centric"
+  },
+  {
+    "id": "hotel_7",
+    "name": "Corporate Plaza Hotel",
+    "description": "Designed for business, featuring state-of-the-art conference facilities, high-speed Wi-Fi, and business center services.",
+    "amenities": ["meeting rooms", "executive lounge access", "on-site IT support"],
+    "management_system": "Business & Corporate"
+  },
+  {
+    "id": "hotel_8",
+    "name": "The Business Hub",
+    "description": "The ideal location for corporate travelers, with state-of-the-art conference facilities and dedicated business services.",
+    "amenities": ["meeting rooms", "executive lounge access", "on-site IT support"],
+    "management_system": "Business & Corporate"
+  },
+  {
+    "id": "hotel_9",
+    "name": "The Enterprise Suites",
+    "description": "Professionally-focused lodging with high-speed Wi-Fi, business center services, and meeting rooms.",
+    "amenities": ["meeting rooms", "executive lounge access", "on-site IT support"],
+    "management_system": "Business & Corporate"
+  },
+  {
+    "id": "hotel_10",
+    "name": "The Family Nest Hotel",
+    "description": "A home away from home, with family-sized suites, kid's play areas, and group activity booking.",
+    "amenities": ["extra beds/cribs", "interconnecting rooms", "children's menus"],
+    "management_system": "Family & Group-Oriented"
+  },
+  {
+    "id": "hotel_11",
+    "name": "Group Getaway Suites",
+    "description": "Perfect for families and groups, offering family-sized suites, kid's play areas, and group booking services.",
+    "amenities": ["extra beds/cribs", "interconnecting rooms", "children's menus"],
+    "management_system": "Family & Group-Oriented"
+  },
+  {
+    "id": "hotel_12",
+    "name": "The Reunion Retreat",
+    "description": "Built for large parties, focusing on group activity booking, family-sized suites, and fun for all ages.",
+    "amenities": ["extra beds/cribs", "interconnecting rooms", "children's menus"],
+    "management_system": "Family & Group-Oriented"
+  },
+  {
+    "id": "hotel_13",
+    "name": "The Grand Luxuria",
+    "description": "A symbol of prestige and five-star service, offering bespoke experiences and exclusive access.",
+    "amenities": ["spa services", "valet parking", "personal butler", "in-room dining"],
+    "management_system": "Luxury & High-End"
+  },
+  {
+    "id": "hotel_14",
+    "name": "Elite Suites",
+    "description": "The pinnacle of high-end lodging, with bespoke experiences and exclusive access.",
+    "amenities": ["spa services", "valet parking", "personal butler", "in-room dining"],
+    "management_system": "Luxury & High-End"
+  },
+  {
+    "id": "hotel_15",
+    "name": "The Exquisite Residence",
+    "description": "An exclusive experience with five-star service, bespoke experiences, and a personal butler.",
+    "amenities": ["spa services", "valet parking", "personal butler", "in-room dining"],
+    "management_system": "Luxury & High-End"
+  }
+]
